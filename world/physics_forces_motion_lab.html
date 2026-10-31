@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forces &amp; Motion Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ef; --ink:#1f2430; --ink-dim:#6b7280; --rule:#dcd7c9;
+    --accent:#3457d5; --accent-dim:#dbe1fb; --amber:#c17f3a; --amber-dim:#f3e3d1;
+    --card:#ffffff; --danger:#c14e3a; --good:#2f7d32;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;padding:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 2px;}
+  .sub{color:var(--ink-dim);font-size:13px;margin-bottom:16px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:920px;margin:0 auto;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .tab{padding:8px 16px;border-radius:10px 10px 0 0;background:#ece8dd;color:var(--ink-dim);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--rule);border-bottom:none;}
+  .tab.active{background:var(--card);color:var(--ink);}
+  .panel{display:none;background:var(--card);border:1px solid var(--rule);border-radius:0 12px 12px 12px;padding:20px;}
+  .panel.active{display:block;}
+
+  canvas{display:block;width:100%;border-radius:10px;background:#fbfaf6;border:1px solid var(--rule);}
+  .scene{margin-bottom:14px;}
+
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-bottom:14px;padding:14px;background:#faf9f5;border-radius:10px;border:1px solid var(--rule);}
+  .ctl{display:flex;flex-direction:column;gap:4px;min-width:130px;}
+  .ctl label{font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;}
+  .ctl .val{font-size:12px;font-weight:600;color:var(--accent);}
+  input[type=range]{accent-color:var(--accent);width:150px;}
+  .btnrow{display:flex;gap:8px;}
+  button{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;border:1px solid var(--rule);background:var(--card);cursor:pointer;color:var(--ink);}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
+  .chk input{accent-color:var(--accent);}
+
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+  .stat{background:#faf9f5;border:1px solid var(--rule);border-radius:8px;padding:10px 12px;}
+  .stat .k{font-size:10.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;}
+  .stat .v{font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+  .regime{grid-column:1/-1;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;padding:9px 12px;font-size:12.5px;}
+
+  .graphs{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .graph-box{background:#faf9f5;border:1px solid var(--rule);border-radius:10px;padding:10px;}
+  .graph-box .title{font-size:11.5px;font-weight:600;color:var(--ink-dim);margin-bottom:6px;}
+
+  .momentum-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
+  .momentum-table th, .momentum-table td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--rule);}
+  .momentum-table th:first-child, .momentum-table td:first-child{text-align:left;}
+  .momentum-table th{color:var(--ink-dim);font-weight:600;font-size:11px;text-transform:uppercase;}
+  .match{color:var(--good);font-weight:700;}
+
+  @media (max-width:640px){
+    .graphs{grid-template-columns:1fr;}
+    .readouts{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Forces &amp; Motion Lab</h1>
+  <div class="sub">O/L Physics — rectilinear motion, Newton's laws, friction, momentum &amp; collisions</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="motion">Motion &amp; Friction</div>
+    <div class="tab" data-tab="collision">Collisions — Newton's Third Law</div>
+  </div>
+
+  <!-- ===================== TAB 1: MOTION & FRICTION ===================== -->
+  <div class="panel active" id="panel-motion">
+    <div class="scene"><canvas id="trackCanvas" width="860" height="220"></canvas></div>
+
+    <div class="controls">
+      <div class="ctl">
+        <label>Mass</label>
+        <input type="range" id="massSlider" min="1" max="20" value="5" step="0.5">
+        <span class="val" id="massVal">5.0 kg</span>
+      </div>
+      <div class="ctl">
+        <label>Applied Force</label>
+        <input type="range" id="forceSlider" min="-60" max="60" value="20" step="1">
+        <span class="val" id="forceVal">20 N</span>
+      </div>
+      <div class="ctl">
+        <label>Friction coefficient (μ)</label>
+        <input type="range" id="muSlider" min="0" max="1" value="0.3" step="0.01">
+        <span class="val" id="muVal">0.30</span>
+      </div>
+      <div class="ctl">
+        <label class="chk"><input type="checkbox" id="frictionToggle" checked> Friction enabled</label>
+      </div>
+      <div class="btnrow">
+        <button class="primary" id="playPauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+        <label class="chk"><input type="checkbox" id="vectorToggle" checked> Show force vectors</label>
+      </div>
+    </div>
+
+    <div class="readouts">
+      <div class="stat"><div class="k">Net Force</div><div class="v mono" id="rNetForce">0 N</div></div>
+      <div class="stat"><div class="k">Acceleration</div><div class="v mono" id="rAccel">0.00 m/s²</div></div>
+      <div class="stat"><div class="k">Velocity</div><div class="v mono" id="rVel">0.00 m/s</div></div>
+      <div class="stat"><div class="k">Position</div><div class="v mono" id="rPos">0.0 m</div></div>
+      <div class="regime" id="rRegime">Frictionless — block accelerates freely under the applied force.</div>
+    </div>
+
+    <div class="graphs">
+      <div class="graph-box"><div class="title">Displacement–Time (s–t)</div><canvas id="stGraph" width="400" height="180"></canvas></div>
+      <div class="graph-box"><div class="title">Velocity–Time (v–t)</div><canvas id="vtGraph" width="400" height="180"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 2: COLLISIONS ===================== -->
+  <div class="panel" id="panel-collision">
+    <div class="scene"><canvas id="collisionCanvas" width="860" height="220"></canvas></div>
+
+    <div class="controls">
+      <div class="ctl">
+        <label>Cart 1 mass</label>
+        <input type="range" id="m1Slider" min="1" max="10" value="3" step="0.5">
+        <span class="val" id="m1Val">3.0 kg</span>
+      </div>
+      <div class="ctl">
+        <label>Cart 1 velocity</label>
+        <input type="range" id="v1Slider" min="0" max="8" value="5" step="0.5">
+        <span class="val" id="v1Val">5.0 m/s</span>
+      </div>
+      <div class="ctl">
+        <label>Cart 2 mass</label>
+        <input type="range" id="m2Slider" min="1" max="10" value="5" step="0.5">
+        <span class="val" id="m2Val">5.0 kg</span>
+      </div>
+      <div class="ctl">
+        <label>Cart 2 velocity</label>
+        <input type="range" id="v2Slider" min="-4" max="4" value="0" step="0.5">
+        <span class="val" id="v2Val">0.0 m/s</span>
+      </div>
+      <div class="ctl">
+        <label>Collision type</label>
+        <select id="collisionType" style="padding:7px;border-radius:8px;border:1px solid var(--rule);font-family:'Inter',sans-serif;">
+          <option value="elastic">Elastic (bounce apart)</option>
+          <option value="inelastic">Perfectly inelastic (stick together)</option>
+        </select>
+      </div>
+      <div class="btnrow">
+        <button class="primary" id="runBtn">Run</button>
+        <button id="resetCollisionBtn">Reset</button>
+      </div>
+    </div>
+
+    <table class="momentum-table">
+      <thead><tr><th></th><th>Cart 1</th><th>Cart 2</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Momentum before (kg·m/s)</td><td class="mono" id="p1before">–</td><td class="mono" id="p2before">–</td><td class="mono" id="ptbefore">–</td></tr>
+        <tr><td>Velocity after (m/s)</td><td class="mono" id="v1after">–</td><td class="mono" id="v2after">–</td><td></td></tr>
+        <tr><td>Momentum after (kg·m/s)</td><td class="mono" id="p1after">–</td><td class="mono" id="p2after">–</td><td class="mono" id="ptafter">–</td></tr>
+      </tbody>
+    </table>
+    <div class="regime" id="collisionNote" style="margin-top:10px;">Set the masses and speeds, then press Run. Watch the momentum totals — they always match, because the force Cart 1 exerts on Cart 2 during contact is equal and opposite to the force Cart 2 exerts on Cart 1 (Newton's Third Law).</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  };
+});
+
+// ============================================================
+// TAB 1: MOTION & FRICTION
+// ============================================================
+const g = 9.8;
+const trackCanvas = document.getElementById('trackCanvas');
+const tctx = trackCanvas.getContext('2d');
+const stCanvas = document.getElementById('stGraph');
+const stctx = stCanvas.getContext('2d');
+const vtCanvas = document.getElementById('vtGraph');
+const vtctx = vtCanvas.getContext('2d');
+
+const massSlider = document.getElementById('massSlider');
+const forceSlider = document.getElementById('forceSlider');
+const muSlider = document.getElementById('muSlider');
+const frictionToggle = document.getElementById('frictionToggle');
+const vectorToggle = document.getElementById('vectorToggle');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+let state = { pos:0, vel:0, t:0, playing:true };
+let history = [];
+
+function refreshLabels(){
+  document.getElementById('massVal').textContent = (+massSlider.value).toFixed(1)+" kg";
+  document.getElementById('forceVal').textContent = forceSlider.value+" N";
+  document.getElementById('muVal').textContent = (+muSlider.value).toFixed(2);
+}
+[massSlider, forceSlider, muSlider].forEach(s=>s.addEventListener('input', refreshLabels));
+refreshLabels();
+
+playPauseBtn.onclick = ()=>{
+  state.playing = !state.playing;
+  playPauseBtn.textContent = state.playing ? "Pause" : "Play";
+};
+resetBtn.onclick = ()=>{
+  state.pos=0; state.vel=0; state.t=0; history=[];
+};
+
+function drawArrow(ctx,x,y,dx,dy,color,label){
+  if(Math.abs(dx)+Math.abs(dy) < 1) return;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx,y+dy); ctx.stroke();
+  const ang = Math.atan2(dy,dx);
+  ctx.beginPath();
+  ctx.moveTo(x+dx,y+dy);
+  ctx.lineTo(x+dx-10*Math.cos(ang-0.4), y+dy-10*Math.sin(ang-0.4));
+  ctx.lineTo(x+dx-10*Math.cos(ang+0.4), y+dy-10*Math.sin(ang+0.4));
+  ctx.closePath(); ctx.fill();
+  ctx.font="600 12px 'JetBrains Mono', monospace";
+  ctx.fillText(label, x+dx+6, y+dy+ (dy<0?-4:14));
+}
+
+function stepMotion(dt){
+  const mass = +massSlider.value;
+  const applied = +forceSlider.value;
+  const mu = +muSlider.value;
+  const frictionOn = frictionToggle.checked;
+
+  let frictionForce = 0;
+  let regime = "Frictionless — block accelerates freely under the applied force.";
+
+  if(frictionOn){
+    const maxStatic = mu*mass*g;
+    const kinetic = 0.85*mu*mass*g;
+    if(Math.abs(state.vel) < 0.02){
+      if(Math.abs(applied) <= maxStatic){
+        frictionForce = -applied; // exactly cancels — static friction adapts
+        regime = "At rest — static friction (up to "+maxStatic.toFixed(1)+" N) is balancing the applied force. The block won't move until you exceed this.";
+      } else {
+        frictionForce = -Math.sign(applied)*maxStatic;
+        regime = "Applied force just exceeded limiting friction ("+maxStatic.toFixed(1)+" N) — the block starts to slide.";
+      }
+    } else {
+      frictionForce = -Math.sign(state.vel)*kinetic;
+      regime = "Moving — kinetic (dynamic) friction ("+kinetic.toFixed(1)+" N) opposes motion. Notice it's slightly lower than the limiting value ("+maxStatic.toFixed(1)+" N).";
+    }
+  }
+
+  const net = applied + frictionForce;
+  const accel = net/mass;
+  state.vel += accel*dt;
+  state.pos += state.vel*dt;
+  state.t += dt;
+
+  document.getElementById('rNetForce').textContent = net.toFixed(1)+" N";
+  document.getElementById('rAccel').textContent = accel.toFixed(2)+" m/s²";
+  document.getElementById('rVel').textContent = state.vel.toFixed(2)+" m/s";
+  document.getElementById('rPos').textContent = state.pos.toFixed(1)+" m";
+  document.getElementById('rRegime').textContent = regime;
+
+  history.push({t:state.t, s:state.pos, v:state.vel});
+  if(history.length > 300) history.shift();
+
+  return {applied, frictionForce, net};
+}
+
+function drawTrack(forces){
+  const w = trackCanvas.width, h = trackCanvas.height;
+  tctx.clearRect(0,0,w,h);
+  const groundY = h*0.72;
+  const pxPerM = 26;
+
+  tctx.strokeStyle = "#c9c3b2"; tctx.lineWidth=2;
+  tctx.beginPath(); tctx.moveTo(0,groundY); tctx.lineTo(w,groundY); tctx.stroke();
+
+  tctx.fillStyle = "#8a8470"; tctx.font = "11px 'JetBrains Mono', monospace"; tctx.textAlign="center";
+  const startM = Math.floor(state.pos - w/(2*pxPerM)) - 1;
+  const endM = Math.ceil(state.pos + w/(2*pxPerM)) + 1;
+  for(let m=startM; m<=endM; m++){
+    const x = w/2 + (m-state.pos)*pxPerM;
+    tctx.beginPath(); tctx.moveTo(x,groundY); tctx.lineTo(x,groundY+8); tctx.stroke();
+    if(m%5===0) tctx.fillText(m+"m", x, groundY+22);
+  }
+
+  const bx = w/2, by = groundY-24;
+  tctx.fillStyle = "#3457d5";
+  tctx.beginPath(); tctx.roundRect(bx-28,by-20,56,40,8); tctx.fill();
+  tctx.fillStyle="#fff"; tctx.font="700 11px 'Space Grotesk', sans-serif"; tctx.textAlign="center";
+  tctx.fillText("m", bx, by+4);
+
+  if(vectorToggle.checked){
+    const scale = 1.6;
+    drawArrow(tctx, bx, by, Math.sign(forces.applied)*Math.min(90,Math.abs(forces.applied)*scale), 0, "#c17f3a", forces.applied.toFixed(0)+"N applied");
+    drawArrow(tctx, bx, by, Math.sign(forces.frictionForce)*Math.min(90,Math.abs(forces.frictionForce)*scale), 0, "#c14e3a", forces.frictionForce.toFixed(0)+"N friction");
+    drawArrow(tctx, bx, by-24, 0, -40, "#8a8470", "N");
+    drawArrow(tctx, bx, by+20, 0, 34, "#8a8470", "mg");
+  }
+}
+
+function drawGraph(ctx, canvas, key, color, unit){
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#e5e1d3"; ctx.lineWidth=1;
+  for(let i=1;i<4;i++){ const y=h*i/4; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  if(history.length<2) return;
+  const tMax = history[history.length-1].t;
+  const tMin = Math.max(0, tMax-15);
+  const visible = history.filter(p=>p.t>=tMin);
+  let vMax = Math.max(1, ...visible.map(p=>Math.abs(p[key])));
+  ctx.strokeStyle=color; ctx.lineWidth=2.4; ctx.beginPath();
+  visible.forEach((p,i)=>{
+    const x = ((p.t-tMin)/(tMax-tMin||1))*w;
+    const y = h/2 - (p[key]/vMax)*(h/2-10);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.strokeStyle="#c9c3b2"; ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+  ctx.fillStyle="#8a8470"; ctx.font="10px 'JetBrains Mono', monospace"; ctx.textAlign="left";
+  ctx.fillText("+"+vMax.toFixed(1)+unit, 4, 12);
+  ctx.fillText("-"+vMax.toFixed(1)+unit, 4, h-4);
+}
+
+let lastTime = performance.now();
+function motionLoop(now){
+  requestAnimationFrame(motionLoop);
+  const dt = Math.min((now-lastTime)/1000, 0.05);
+  lastTime = now;
+  const forces = stepMotion(state.playing ? dt : 0);
+  drawTrack(forces);
+  drawGraph(stctx, stCanvas, 's', '#3457d5', 'm');
+  drawGraph(vtctx, vtCanvas, 'v', '#0e8f7f', 'm/s');
+}
+requestAnimationFrame(motionLoop);
+
+// ============================================================
+// TAB 2: COLLISIONS
+// ============================================================
+const cCanvas = document.getElementById('collisionCanvas');
+const cctx = cCanvas.getContext('2d');
+const m1S=document.getElementById('m1Slider'), v1S=document.getElementById('v1Slider');
+const m2S=document.getElementById('m2Slider'), v2S=document.getElementById('v2Slider');
+const collisionType = document.getElementById('collisionType');
+const runBtn = document.getElementById('runBtn');
+const resetCollisionBtn = document.getElementById('resetCollisionBtn');
+
+function refreshCollisionLabels(){
+  document.getElementById('m1Val').textContent = (+m1S.value).toFixed(1)+" kg";
+  document.getElementById('v1Val').textContent = (+v1S.value).toFixed(1)+" m/s";
+  document.getElementById('m2Val').textContent = (+m2S.value).toFixed(1)+" kg";
+  document.getElementById('v2Val').textContent = (+v2S.value).toFixed(1)+" m/s";
+}
+[m1S,v1S,m2S,v2S].forEach(s=>s.addEventListener('input', refreshCollisionLabels));
+refreshCollisionLabels();
+
+const pxPerM2 = 55;
+let cart1 = {x:1, v:0, m:3, w:0.9};
+let cart2 = {x:9, v:0, m:5, w:0.9};
+let collided = false;
+let running = false;
+let flash = 0;
+
+function resetCollision(){
+  cart1 = {x:1, v:+v1S.value, m:+m1S.value, w:0.9};
+  cart2 = {x:9, v:+v2S.value, m:+m2S.value, w:0.9};
+  collided = false; running=false; flash=0;
+  ['p1before','p2before','ptbefore','v1after','v2after','p1after','p2after','ptafter'].forEach(id=>document.getElementById(id).textContent='–');
+}
+resetCollision();
+[m1S,v1S,m2S,v2S,collisionType].forEach(s=>s.addEventListener('change', resetCollision));
+
+runBtn.onclick = ()=>{
+  resetCollision();
+  const p1 = cart1.m*cart1.v, p2 = cart2.m*cart2.v;
+  document.getElementById('p1before').textContent = p1.toFixed(1);
+  document.getElementById('p2before').textContent = p2.toFixed(1);
+  document.getElementById('ptbefore').textContent = (p1+p2).toFixed(1);
+  running = true;
+};
+resetCollisionBtn.onclick = resetCollision;
+
+function applyCollision(){
+  const m1=cart1.m, m2=cart2.m, u1=cart1.v, u2=cart2.v;
+  let v1f, v2f;
+  if(collisionType.value === 'elastic'){
+    v1f = ((m1-m2)*u1 + 2*m2*u2)/(m1+m2);
+    v2f = ((m2-m1)*u2 + 2*m1*u1)/(m1+m2);
+  } else {
+    v1f = v2f = (m1*u1+m2*u2)/(m1+m2);
+  }
+  cart1.v = v1f; cart2.v = v2f;
+  const p1a = m1*v1f, p2a = m2*v2f;
+  document.getElementById('v1after').textContent = v1f.toFixed(2);
+  document.getElementById('v2after').textContent = v2f.toFixed(2);
+  document.getElementById('p1after').textContent = p1a.toFixed(1);
+  document.getElementById('p2after').textContent = p2a.toFixed(1);
+  document.getElementById('ptafter').textContent = (p1a+p2a).toFixed(1);
+  document.getElementById('ptafter').classList.add('match');
+  flash = 1;
+}
+
+function drawCollisionScene(){
+  const w=cCanvas.width, h=cCanvas.height;
+  cctx.clearRect(0,0,w,h);
+  const groundY = h*0.72;
+  cctx.strokeStyle="#c9c3b2"; cctx.lineWidth=2;
+  cctx.beginPath(); cctx.moveTo(0,groundY); cctx.lineTo(w,groundY); cctx.stroke();
+
+  function drawCart(cart, color, label){
+    const x = cart.x*pxPerM2, y = groundY-30;
+    const cw = cart.w*pxPerM2;
+    cctx.fillStyle = color;
+    cctx.beginPath(); cctx.roundRect(x-cw/2, y-30, cw, 30, 6); cctx.fill();
+    cctx.fillStyle="#fff"; cctx.font="700 11px 'Space Grotesk', sans-serif"; cctx.textAlign="center";
+    cctx.fillText(label, x, y-12);
+    // wheels
+    cctx.fillStyle="#3a362b";
+    cctx.beginPath(); cctx.arc(x-cw/3, y+2, 5,0,Math.PI*2); cctx.fill();
+    cctx.beginPath(); cctx.arc(x+cw/3, y+2, 5,0,Math.PI*2); cctx.fill();
+  }
+  drawCart(cart1, "#3457d5", cart1.m.toFixed(1)+"kg");
+  drawCart(cart2, "#c17f3a", cart2.m.toFixed(1)+"kg");
+
+  if(flash>0){
+    cctx.fillStyle = `rgba(193,78,58,${flash})`;
+    const midx = ((cart1.x+cart1.w/2)+(cart2.x-cart2.w/2))/2*pxPerM2;
+    cctx.beginPath(); cctx.arc(midx, groundY-45, 22*flash+6, 0, Math.PI*2); cctx.fill();
+    cctx.fillStyle=`rgba(31,36,48,${flash})`;
+    cctx.font="700 11px 'JetBrains Mono', monospace"; cctx.textAlign="center";
+    cctx.fillText("F₁₂ = -F₂₁", midx, groundY-42);
+    flash -= 0.02;
+  }
+}
+
+let lastTime2 = performance.now();
+function collisionLoop(now){
+  requestAnimationFrame(collisionLoop);
+  const dt = Math.min((now-lastTime2)/1000, 0.05);
+  lastTime2 = now;
+
+  if(running){
+    cart1.x += cart1.v*dt;
+    cart2.x += cart2.v*dt;
+
+    if(!collided && (cart1.x+cart1.w/2) >= (cart2.x-cart2.w/2)){
+      collided = true;
+      applyCollision();
+    }
+    if(cart1.x < 0.5 || cart2.x > 13.5) running=false;
+  }
+  drawCollisionScene();
+}
+requestAnimationFrame(collisionLoop);
+</script>
+</body>
+</html>

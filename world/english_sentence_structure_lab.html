@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentence Structure Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ef; --ink:#1f2430; --ink-dim:#6b7280; --rule:#dcd7c9;
+    --accent:#a13d63; --accent-dim:#f3dee6; --card:#ffffff;
+    --noun:#3457d5; --verb:#c14e3a; --adj:#0e8f7f; --adv:#c17f3a;
+    --pron:#8858c9; --prep:#4a8f4f; --conj:#d1a300; --det:#8a8470;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;padding:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 2px;}
+  .sub{color:var(--ink-dim);font-size:13px;margin-bottom:16px;}
+  .wrap{max-width:960px;margin:0 auto;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;}
+  .tab{padding:9px 16px;border-radius:10px 10px 0 0;background:#ece8dd;color:var(--ink-dim);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--rule);border-bottom:none;}
+  .tab.active{background:var(--card);color:var(--ink);}
+  .panel{display:none;background:var(--card);border:1px solid var(--rule);border-radius:0 12px 12px 12px;padding:22px;}
+  .panel.active{display:block;}
+
+  /* TAB 1 */
+  .sentlist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+  .sentchip{padding:8px 14px;border-radius:20px;border:1px solid var(--rule);background:#faf9f5;font-size:12.5px;cursor:pointer;color:var(--ink-dim);}
+  .sentchip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .typebadge{display:inline-block;padding:4px 12px;border-radius:20px;background:var(--accent-dim);color:var(--accent);font-weight:700;font-size:12px;margin-bottom:14px;}
+  .sentence-display{font-size:19px;line-height:2.1;margin-bottom:6px;font-family:'Space Grotesk',sans-serif;}
+  .word{display:inline-block;padding:2px 4px;border-radius:5px;margin:0 1px;cursor:default;position:relative;color:#fff;}
+  .pos-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--ink-dim);margin:10px 0 20px;}
+  .pos-legend span{display:flex;align-items:center;gap:5px;}
+  .sw{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  .clause-title{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-dim);margin:18px 0 8px;}
+  .clause-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .clause-box{padding:10px 14px;border-radius:10px;font-size:14px;font-family:'JetBrains Mono',monospace;}
+  .clause-box.independent{background:#dbe1fb;border:1.5px solid var(--noun);}
+  .clause-box.dependent{background:#f3e3d1;border:1.5px solid var(--adv);}
+  .conj-pill{padding:6px 10px;border-radius:20px;background:var(--conj);color:#3a2f00;font-size:12px;font-weight:700;}
+  .type-explain{margin-top:16px;font-size:13px;color:var(--ink-dim);background:#faf9f5;border:1px solid var(--rule);border-radius:10px;padding:12px 14px;}
+
+  /* TAB 2 & 3 flip cards */
+  .flip-list{display:flex;flex-direction:column;gap:14px;}
+  .flip-card{background:#faf9f5;border:1px solid var(--rule);border-radius:12px;padding:16px 18px;cursor:pointer;}
+  .flip-card .label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:700;margin-bottom:6px;}
+  .flip-card .text{font-size:15px;font-family:'Space Grotesk',sans-serif;}
+  .flip-card .changes{margin-top:10px;font-size:12.5px;color:var(--ink-dim);display:none;border-top:1px dashed var(--rule);padding-top:10px;}
+  .flip-card.flipped .changes{display:block;}
+  .flip-card .hint{font-size:11px;color:var(--ink-dim);margin-top:8px;font-style:italic;}
+  .hl-subj{color:var(--noun);font-weight:700;}
+  .hl-obj{color:var(--verb);font-weight:700;}
+  .hl-verb{color:var(--adj);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sentence Structure Lab</h1>
+  <div class="sub">O/L English — sentence types, clauses, active/passive voice, direct/indirect speech</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="types">Sentence Types &amp; Clauses</div>
+    <div class="tab" data-tab="voice">Active ↔ Passive Voice</div>
+    <div class="tab" data-tab="speech">Direct ↔ Indirect Speech</div>
+  </div>
+
+  <!-- ===================== TAB 1 ===================== -->
+  <div class="panel active" id="panel-types">
+    <div class="sentlist" id="sentList"></div>
+    <div id="sentenceDetail"></div>
+  </div>
+
+  <!-- ===================== TAB 2 ===================== -->
+  <div class="panel" id="panel-voice">
+    <p style="color:var(--ink-dim);font-size:13px;margin-top:0;">Click a card to flip between active and passive voice. Notice: the <span class="hl-subj">active subject</span> becomes the "by ___" agent, and the <span class="hl-obj">active object</span> becomes the new subject.</p>
+    <div class="flip-list" id="voiceList"></div>
+  </div>
+
+  <!-- ===================== TAB 3 ===================== -->
+  <div class="panel" id="panel-speech">
+    <p style="color:var(--ink-dim);font-size:13px;margin-top:0;">Click a card to flip between direct and indirect (reported) speech. Watch how pronouns, tenses, and time words shift.</p>
+    <div class="flip-list" id="speechList"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  };
+});
+
+// ============================================================
+// TAB 1: SENTENCE TYPES & CLAUSES
+// ============================================================
+const POS_COLOR = {noun:"var(--noun)",verb:"var(--verb)",adj:"var(--adj)",adv:"var(--adv)",pron:"var(--pron)",prep:"var(--prep)",conj:"var(--conj)",det:"var(--det)"};
+const POS_LABEL = {noun:"Noun",verb:"Verb",adj:"Adjective",adv:"Adverb",pron:"Pronoun",prep:"Preposition",conj:"Conjunction",det:"Determiner"};
+
+const SENTENCES = [
+  {
+    label:"Simple #1", type:"Simple Sentence",
+    words:[["The","det"],["dog","noun"],["barked","verb"],["loudly","adv"]],
+    clauses:[{text:"The dog barked loudly", kind:"independent"}],
+    explain:"A simple sentence has exactly one independent clause — one subject and one verb, expressing one complete thought. No conjunction is needed because there's nothing else being joined."
+  },
+  {
+    label:"Simple #2", type:"Simple Sentence",
+    words:[["She","pron"],["quickly","adv"],["finished","verb"],["her","det"],["homework","noun"]],
+    clauses:[{text:"She quickly finished her homework", kind:"independent"}],
+    explain:"Still just one subject (She) and one verb (finished) — even with extra describing words, it remains simple."
+  },
+  {
+    label:"Compound #1", type:"Compound Sentence",
+    words:[["I","pron"],["wanted","verb"],["to","prep"],["go","verb"],["for","prep"],["a","det"],["walk","noun"],["but","conj"],["it","pron"],["started","verb"],["raining","verb"]],
+    clauses:[{text:"I wanted to go for a walk", kind:"independent"},{text:"but", conj:true},{text:"it started raining", kind:"independent"}],
+    explain:"Two independent clauses — each could stand alone as its own sentence — joined by the coordinating conjunction 'but'. Coordinating conjunctions (FANBOYS: for, and, nor, but, or, yet, so) always join equal, independent ideas."
+  },
+  {
+    label:"Compound #2", type:"Compound Sentence",
+    words:[["She","pron"],["studied","verb"],["hard","adv"],["and","conj"],["she","pron"],["passed","verb"],["the","det"],["exam","noun"]],
+    clauses:[{text:"She studied hard", kind:"independent"},{text:"and", conj:true},{text:"she passed the exam", kind:"independent"}],
+    explain:"Two complete, equal ideas joined by 'and'. Note each half has its own subject and verb — that's what makes both clauses independent."
+  },
+  {
+    label:"Complex #1", type:"Complex Sentence",
+    words:[["Although","conj"],["it","pron"],["was","verb"],["raining","verb"],["we","pron"],["went","verb"],["to","prep"],["the","det"],["market","noun"]],
+    clauses:[{text:"Although it was raining", kind:"dependent"},{text:"we went to the market", kind:"independent"}],
+    explain:"One dependent clause ('Although it was raining' — it can't stand alone, it needs the rest of the sentence) joined to one independent clause. Subordinating conjunctions (although, because, if, when, since...) create this dependence."
+  },
+  {
+    label:"Complex #2", type:"Complex Sentence",
+    words:[["He","pron"],["passed","verb"],["the","det"],["test","noun"],["because","conj"],["he","pron"],["studied","verb"],["every","det"],["night","noun"]],
+    clauses:[{text:"He passed the test", kind:"independent"},{text:"because he studied every night", kind:"dependent"}],
+    explain:"Here the dependent clause comes second. 'Because he studied every night' answers 'why', but can't be its own sentence."
+  },
+  {
+    label:"Compound-Complex", type:"Compound-Complex Sentence",
+    words:[["Although","conj"],["she","pron"],["was","verb"],["tired","adj"],["she","pron"],["finished","verb"],["her","det"],["project","noun"],["and","conj"],["she","pron"],["felt","verb"],["proud","adj"]],
+    clauses:[{text:"Although she was tired", kind:"dependent"},{text:"she finished her project", kind:"independent"},{text:"and", conj:true},{text:"she felt proud", kind:"independent"}],
+    explain:"This combines both patterns: one dependent clause plus two independent clauses joined by 'and'. That's what makes it compound-complex — the most advanced sentence type tested at O/L."
+  }
+];
+
+let selectedSentence = 0;
+
+function buildSentList(){
+  const list = document.getElementById('sentList');
+  list.innerHTML = "";
+  SENTENCES.forEach((s,i)=>{
+    const chip = document.createElement('div');
+    chip.className = 'sentchip' + (i===selectedSentence ? ' active':'');
+    chip.textContent = s.label;
+    chip.onclick = ()=>{ selectedSentence=i; render(); };
+    list.appendChild(chip);
+  });
+}
+
+function renderSentenceDetail(){
+  const s = SENTENCES[selectedSentence];
+  const wordsHtml = s.words.map(([w,pos])=>`<span class="word" style="background:${POS_COLOR[pos]}" title="${POS_LABEL[pos]}">${w}</span>`).join(' ');
+  const legendHtml = [...new Set(s.words.map(w=>w[1]))].map(pos=>`<span><i class="sw" style="background:${POS_COLOR[pos]}"></i>${POS_LABEL[pos]}</span>`).join('');
+  const clausesHtml = s.clauses.map(c=> c.conj
+    ? `<div class="conj-pill">${c.text}</div>`
+    : `<div class="clause-box ${c.kind}">${c.text}<br><small style="opacity:.6;text-transform:uppercase;font-size:9px;">${c.kind} clause</small></div>`
+  ).join('');
+
+  document.getElementById('sentenceDetail').innerHTML = `
+    <div class="typebadge">${s.type}</div>
+    <div class="sentence-display">${wordsHtml}</div>
+    <div class="pos-legend">${legendHtml}</div>
+    <div class="clause-title">Clause breakdown</div>
+    <div class="clause-row">${clausesHtml}</div>
+    <div class="type-explain">${s.explain}</div>
+  `;
+}
+
+function render(){ buildSentList(); renderSentenceDetail(); }
+render();
+
+// ============================================================
+// TAB 2: ACTIVE / PASSIVE VOICE
+// ============================================================
+const VOICE_PAIRS = [
+  {active:'The <span class="hl-subj">cat</span> chased the <span class="hl-obj">mouse</span>.',
+   passive:'The <span class="hl-subj">mouse</span> was chased by the <span class="hl-obj">cat</span>.',
+   changes:"Subject and object swap places. The verb changes from 'chased' to 'was chased' (be + past participle)."},
+  {active:'The <span class="hl-subj">teacher</span> will explain the <span class="hl-obj">lesson</span> tomorrow.',
+   passive:'The <span class="hl-subj">lesson</span> will be explained by the <span class="hl-obj">teacher</span> tomorrow.',
+   changes:"Future tense 'will explain' becomes 'will be explained'. The doer ('teacher') moves into a 'by' phrase at the end."},
+  {active:'<span class="hl-subj">They</span> built this <span class="hl-obj">house</span> in 1990.',
+   passive:'This <span class="hl-subj">house</span> was built by <span class="hl-obj">them</span> in 1990.',
+   changes:"Past simple 'built' becomes 'was built'. Pronoun 'They' (subject form) becomes 'them' (object form) in the by-phrase."},
+  {active:'<span class="hl-subj">She</span> is writing a <span class="hl-obj">letter</span>.',
+   passive:'A <span class="hl-subj">letter</span> is being written by <span class="hl-obj">her</span>.',
+   changes:"Present continuous 'is writing' becomes 'is being written'. 'She' → 'her' in the by-phrase."},
+  {active:'The <span class="hl-subj">farmer</span> plants <span class="hl-obj">rice</span> every year.',
+   passive:'<span class="hl-subj">Rice</span> is planted by the <span class="hl-obj">farmer</span> every year.',
+   changes:"Present simple 'plants' becomes 'is planted'. Notice the time phrase 'every year' stays in the same position."}
+];
+
+function buildVoiceList(){
+  const list = document.getElementById('voiceList');
+  list.innerHTML = "";
+  VOICE_PAIRS.forEach((p,i)=>{
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.dataset.flipped = "0";
+    card.innerHTML = `
+      <div class="label">Active Voice</div>
+      <div class="text">${p.active}</div>
+      <div class="changes"><strong>Passive:</strong> ${p.passive}<br><br>${p.changes}</div>
+      <div class="hint">Click to see the passive version</div>`;
+    card.onclick = ()=>{
+      const flipped = card.dataset.flipped === "1";
+      card.dataset.flipped = flipped ? "0" : "1";
+      card.classList.toggle('flipped');
+      card.querySelector('.label').textContent = flipped ? "Active Voice" : "Passive Voice";
+      card.querySelector('.text').innerHTML = flipped ? p.active : p.passive;
+      card.querySelector('.changes').innerHTML = flipped
+        ? `<strong>Passive:</strong> ${p.passive}<br><br>${p.changes}`
+        : `<strong>Active:</strong> ${p.active}<br><br>${p.changes}`;
+      card.querySelector('.hint').textContent = flipped ? "Click to see the passive version" : "Click to go back to active";
+    };
+    list.appendChild(card);
+  });
+}
+buildVoiceList();
+
+// ============================================================
+// TAB 3: DIRECT / INDIRECT SPEECH
+// ============================================================
+const SPEECH_PAIRS = [
+  {direct:'Kamal said, "I am going to the market."',
+   indirect:'Kamal said that he was going to the market.',
+   changes:"Pronoun: I → he. Tense: am going → was going (present continuous → past continuous). Quotation marks are removed and 'that' is added."},
+  {direct:'She said, "I will finish my homework tonight."',
+   indirect:'She said that she would finish her homework that night.',
+   changes:"Pronoun: I → she. Modal: will → would. Time word: tonight → that night (time references shift further from 'now')."},
+  {direct:'The teacher said, "You must submit your assignments on time."',
+   indirect:'The teacher told the students that they had to submit their assignments on time.',
+   changes:"'Said + you' becomes 'told + the students'. Pronoun: You → they, your → their. Modal: must → had to."},
+  {direct:'"Where do you live?" she asked me.',
+   indirect:'She asked me where I lived.',
+   changes:"Question word order changes to statement order (no longer inverted). Tense: do you live → I lived. No question mark in reported speech."},
+  {direct:'He said, "I have finished my work."',
+   indirect:'He said that he had finished his work.',
+   changes:"Tense backshift: present perfect (have finished) → past perfect (had finished). Pronoun: I → he, my → his."}
+];
+
+function buildSpeechList(){
+  const list = document.getElementById('speechList');
+  list.innerHTML = "";
+  SPEECH_PAIRS.forEach((p,i)=>{
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.dataset.flipped = "0";
+    card.innerHTML = `
+      <div class="label">Direct Speech</div>
+      <div class="text">${p.direct}</div>
+      <div class="changes"><strong>Indirect:</strong> ${p.indirect}<br><br>${p.changes}</div>
+      <div class="hint">Click to see the indirect (reported) version</div>`;
+    card.onclick = ()=>{
+      const flipped = card.dataset.flipped === "1";
+      card.dataset.flipped = flipped ? "0" : "1";
+      card.classList.toggle('flipped');
+      card.querySelector('.label').textContent = flipped ? "Direct Speech" : "Indirect Speech";
+      card.querySelector('.text').innerHTML = flipped ? p.direct : p.indirect;
+      card.querySelector('.changes').innerHTML = flipped
+        ? `<strong>Indirect:</strong> ${p.indirect}<br><br>${p.changes}`
+        : `<strong>Direct:</strong> ${p.direct}<br><br>${p.changes}`;
+      card.querySelector('.hint').textContent = flipped ? "Click to see the indirect (reported) version" : "Click to go back to direct speech";
+    };
+    list.appendChild(card);
+  });
+}
+buildSpeechList();
+</script>
+</body>
+</html>

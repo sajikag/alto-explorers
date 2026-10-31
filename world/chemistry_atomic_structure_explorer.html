@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atomic Structure &amp; Periodic Trends Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ef; --ink:#1f2430; --ink-dim:#6b7280; --rule:#dcd7c9;
+    --accent:#0e8f7f; --accent-dim:#d7efec; --card:#ffffff;
+    --metal:#3457d5; --metalloid:#c17f3a; --nonmetal:#0e8f7f; --noble:#8858c9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;padding:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 2px;}
+  .sub{color:var(--ink-dim);font-size:13px;margin-bottom:16px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:1060px;margin:0 auto;}
+
+  .modebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;}
+  .modebar span.lbl{font-size:12px;color:var(--ink-dim);font-weight:600;}
+  .modebtn{padding:7px 14px;border-radius:20px;border:1px solid var(--rule);background:var(--card);font-size:12.5px;cursor:pointer;color:var(--ink-dim);}
+  .modebtn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .legend{display:flex;gap:14px;margin-left:auto;font-size:11px;color:var(--ink-dim);flex-wrap:wrap;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .sw{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  .layout{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr;} }
+
+  .grid{display:grid;grid-template-columns:repeat(18,1fr);gap:4px;background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--rule);}
+  .cell{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.12s;border:2px solid transparent;color:#fff;font-family:'Space Grotesk',sans-serif;}
+  .cell:hover{transform:translateY(-2px);}
+  .cell.selected{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset;}
+  .cell .z{font-size:8px;opacity:.85;line-height:1;}
+  .cell .sym{font-size:14px;font-weight:700;line-height:1.1;}
+  .cell.empty{visibility:hidden;}
+
+  .panel{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px;}
+  .elname{font-size:19px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+  .elmeta{font-size:12.5px;color:var(--ink-dim);margin-bottom:10px;}
+  .bohr-wrap{display:flex;justify-content:center;margin:6px 0 12px;}
+  .info-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-top:1px solid var(--rule);}
+  .info-row .k{color:var(--ink-dim);}
+  .elem-context{margin-top:14px;background:#faf6ee;border:1px solid var(--rule);border-radius:10px;padding:12px 14px;}
+  .ec-row + .ec-row{margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule);}
+  .ec-k{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:700;margin-bottom:4px;}
+  .ec-v{font-size:12.5px;line-height:1.55;color:var(--ink);}
+  .ec-v ul{margin:4px 0 0;padding-left:18px;}
+  .ec-v li{margin-bottom:2px;}
+  .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim);margin:18px 0 8px;}
+  .phys-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .phys-stat{background:#faf9f5;border:1px solid var(--rule);border-radius:8px;padding:8px 10px;}
+  .phys-stat .k{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em;}
+  .phys-stat .v{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+  .fact-box{margin-top:14px;background:#fff6e0;border:1px solid #e8cd7a;border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.55;}
+  .fact-box .lbl{font-weight:700;color:#8a6d1a;display:block;margin-bottom:3px;}
+  .everyday-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .everyday-chip{background:#eaf3e2;border:1px solid #b9d2a4;color:#2f5d2f;font-size:11.5px;padding:5px 10px;border-radius:20px;}
+  .essential-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11.5px;font-weight:700;margin-bottom:6px;}
+  .essential-badge.yes{background:#dcecdc;color:#2f7d32;}
+  .essential-badge.trace{background:#f3e3d1;color:#8a5a2b;}
+  .essential-badge.no{background:#ece8dd;color:#6b7280;}
+  .essential-note{font-size:12px;color:var(--ink-dim);margin-top:4px;}
+  .relatable-note{font-size:11.5px;color:var(--ink-dim);margin-top:8px;font-style:italic;}
+  .sl-box{margin-top:10px;background:#e9f2ec;border:1px solid #9dc4ab;border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.55;}
+  .sl-box .lbl{font-weight:700;color:#1f6b3d;display:block;margin-bottom:3px;}
+  .trend-title{font-size:11.5px;font-weight:600;color:var(--ink-dim);margin:16px 0 6px;text-transform:uppercase;letter-spacing:.04em;}
+  .hint{font-size:12px;color:var(--ink-dim);text-align:center;padding:30px 10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Atomic Structure &amp; Periodic Trends Explorer</h1>
+  <div class="sub">O/L Chemistry — electron configuration, the periodic table, and how properties change across it</div>
+
+  <div class="modebar">
+    <span class="lbl">Colour table by:</span>
+    <div class="modebtn active" data-mode="category">Element category</div>
+    <div class="modebtn" data-mode="ie">First ionization energy</div>
+    <div class="modebtn" data-mode="en">Electronegativity</div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="layout">
+    <div class="grid" id="grid"></div>
+
+    <div class="panel" id="panel">
+      <div class="hint">Click any element to see its Bohr model, electron configuration, and where it sits on each trend.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — first 20 elements
+// ============================================================
+const ELEMENTS = [
+  {z:1,sym:"H",name:"Hydrogen",period:1,group:1,shells:[1],cat:"nonmetal",ie:1312,en:2.20,val:1,mass:1.008,
+   state:"Gas",mp:-259,bp:-253,density:"0.09 g/L",
+   occurrence:"Rarely found alone on Earth — almost always combined, chiefly in water (H₂O) and in every organic/hydrocarbon compound. It's the most abundant element in the universe, fusing in stars including our Sun.",
+   uses:["Rocket &amp; fuel-cell fuel","Making ammonia for fertiliser (Haber process)","Hydrogenating vegetable oils","Welding"],
+   discovered:"1766 — Henry Cavendish", origin:"Greek 'hydro' + 'genes': water-forming, since burning it produces water.",
+   fact:"Powers the Sun and every other star through nuclear fusion.",
+   everyday:["Water (H₂O)","Hydrogen peroxide antiseptic","Vegetable oil labelled 'hydrogenated'"],
+   essential:{status:"yes",note:"A core building block of water and every biomolecule in your body."},
+   relatable:"About 14× lighter than air — it used to fill airships before helium replaced it."},
+  {z:2,sym:"He",name:"Helium",period:1,group:18,shells:[2],cat:"noble",ie:2372,en:null,val:0,mass:4.003,
+   state:"Gas",mp:-272,bp:-269,density:"0.18 g/L",
+   occurrence:"Trapped underground with natural gas deposits, produced there by the radioactive decay of heavy elements like uranium. It's the second most abundant element in the universe.",
+   uses:["Filling balloons &amp; airships","Cooling MRI scanner magnets","Inert shielding gas for welding","Breathing gas mix for deep-sea diving"],
+   discovered:"1868 — Pierre Janssen &amp; Norman Lockyer (in the Sun's spectrum)", origin:"Greek 'helios': sun — found in sunlight 27 years before it was found on Earth.",
+   fact:"Stays liquid even at absolute zero unless put under immense pressure — it never freezes normally.",
+   everyday:["Party &amp; parade balloons","MRI scanners","The 'squeaky voice' party gas"],
+   essential:{status:"no",note:"No known biological role in the human body."},
+   relatable:"About 7× lighter than air — why helium balloons float."},
+  {z:3,sym:"Li",name:"Lithium",period:2,group:1,shells:[2,1],cat:"metal",ie:520,en:0.98,val:1,mass:6.94,
+   state:"Solid",mp:180,bp:1342,density:"0.53 g/cm³",
+   occurrence:"Found in hard-rock ores like spodumene, and in salt-brine deposits under salt flats (e.g. in Chile and Australia).",
+   uses:["Rechargeable lithium-ion batteries","Ceramics &amp; heat-resistant glass","Mood-stabilising medication","Lubricating greases"],
+   discovered:"1817 — Johan August Arfwedson", origin:"Greek 'lithos': stone, since it was discovered in a mineral rather than a plant (like the other alkali metals known at the time).",
+   fact:"Light enough to float on water — and reactive enough to fizz while doing it.",
+   everyday:["Your phone &amp; laptop battery","Some mood-stabilising medications"],
+   essential:{status:"no",note:"Not biologically essential, though used medicinally in small controlled doses."},
+   relatable:"Roughly half the density of water — it would float, like a piece of cork."},
+  {z:4,sym:"Be",name:"Beryllium",period:2,group:2,shells:[2,2],cat:"metal",ie:899,en:1.57,val:2,mass:9.012,
+   state:"Solid",mp:1287,bp:2470,density:"1.85 g/cm³",
+   occurrence:"Found in the minerals beryl and bertrandite — gem varieties of beryl include emerald and aquamarine.",
+   uses:["Lightweight aerospace alloys","Windows for X-ray equipment","Non-sparking tools &amp; springs"],
+   discovered:"1798 — Louis-Nicolas Vauquelin", origin:"From 'beryl', the mineral it was first identified in.",
+   fact:"Forms beautiful gemstones, yet its dust and fumes are highly toxic to inhale.",
+   everyday:["Aircraft &amp; satellite parts (rarely encountered directly)","The emerald/aquamarine in jewellery (as beryl)"],
+   essential:{status:"no",note:"No biological role — and actually toxic in more than trace amounts."},
+   relatable:"Lighter than aluminium yet very stiff — valued in aircraft parts where every gram counts."},
+  {z:5,sym:"B",name:"Boron",period:2,group:13,shells:[2,3],cat:"metalloid",ie:801,en:2.04,val:3,mass:10.81,
+   state:"Solid",mp:2076,bp:3927,density:"2.34 g/cm³",
+   occurrence:"Found in borate minerals like borax, concentrated in dried-up ancient lake beds (e.g. Turkey, California).",
+   uses:["Borosilicate glass (e.g. Pyrex)","Detergents &amp; laundry boosters","Fibreglass insulation","Trace fertiliser nutrient"],
+   discovered:"1808 — Gay-Lussac, Thénard &amp; Davy (independently)", origin:"From 'borax', the mineral it was extracted from.",
+   fact:"Used in the control rods of nuclear reactors because it readily absorbs neutrons.",
+   everyday:["Pyrex/borosilicate bakeware","Laundry borax powder","Fibreglass insulation"],
+   essential:{status:"trace",note:"Not essential for humans, but a required trace nutrient for plant growth."},
+   relatable:"About twice as dense as water — sinks, feels like a heavy stone."},
+  {z:6,sym:"C",name:"Carbon",period:2,group:14,shells:[2,4],cat:"nonmetal",ie:1086,en:2.55,val:4,mass:12.01,
+   state:"Solid",mp:3550,bp:4027,density:"2.27 g/cm³ (graphite)",
+   occurrence:"Occurs free as diamond and graphite, and combined in coal, petroleum, limestone, and every living thing — the chemical basis of all organic matter.",
+   uses:["Fuels (coal, petroleum products)","Steel-making","Pencils &amp; lubricants (graphite)","Cutting tools &amp; jewellery (diamond)"],
+   discovered:"Known since prehistoric times", origin:"Latin 'carbo': coal or charcoal.",
+   fact:"Diamond and graphite are both pure carbon — one is the hardest natural material, the other soft enough to write with.",
+   everyday:["Pencil 'lead' (actually graphite)","Charcoal","Diamond jewellery","Petrol &amp; diesel"],
+   essential:{status:"yes",note:"The structural backbone of every organic molecule in your body."},
+   relatable:"About twice as dense as water (as graphite) — though diamond, also pure carbon, is denser still.",
+   srilanka:"Sri Lanka is one of the world's few sources of high-purity natural vein graphite, historically mined at Bogala, Kahatagaha and Ragedara — a genuinely world-class local resource."},
+  {z:7,sym:"N",name:"Nitrogen",period:2,group:15,shells:[2,5],cat:"nonmetal",ie:1402,en:3.04,val:3,mass:14.01,
+   state:"Gas",mp:-210,bp:-196,density:"1.25 g/L",
+   occurrence:"Makes up about 78% of the Earth's atmosphere by volume, and is combined in proteins and soil nitrates.",
+   uses:["Fertiliser production","Food packaging (inert atmosphere)","Liquid nitrogen for freezing/cryogenics","Manufacturing explosives"],
+   discovered:"1772 — Daniel Rutherford", origin:"Greek 'nitron' + 'genes': niter-forming, referring to saltpetre.",
+   fact:"Liquid nitrogen is -196°C — cold enough to instantly freeze living tissue on contact.",
+   everyday:["The air you're breathing right now (78%)","Fertiliser bags","Instant cold packs"],
+   essential:{status:"yes",note:"Essential for proteins and DNA — you're constantly recycling nitrogen from food."},
+   relatable:"Almost exactly the density of air — makes sense, since it makes up most of it."},
+  {z:8,sym:"O",name:"Oxygen",period:2,group:16,shells:[2,6],cat:"nonmetal",ie:1314,en:3.44,val:2,mass:16.00,
+   state:"Gas",mp:-218,bp:-183,density:"1.43 g/L",
+   occurrence:"About 21% of the atmosphere, and the most abundant element in the Earth's crust — combined in water, oxides, and silicate rocks.",
+   uses:["Breathing/medical oxygen","Steel manufacturing","Oxy-acetylene welding &amp; cutting","Rocket propellant oxidiser"],
+   discovered:"1774 — Joseph Priestley &amp; Carl Wilhelm Scheele (independently)", origin:"Greek 'oxys' + 'genes': acid-forming — an old (slightly mistaken) belief that all acids contained oxygen.",
+   fact:"Its triatomic form, ozone (O₃), high in the atmosphere blocks harmful UV radiation from the Sun.",
+   everyday:["The air you're breathing right now (21%)","Hospital oxygen tanks","Rust (iron oxide)"],
+   essential:{status:"yes",note:"Essential for respiration — your cells can't release energy from food without it."},
+   relatable:"Slightly denser than the average mix of air."},
+  {z:9,sym:"F",name:"Fluorine",period:2,group:17,shells:[2,7],cat:"nonmetal",ie:1681,en:3.98,val:1,mass:19.00,
+   state:"Gas",mp:-220,bp:-188,density:"1.7 g/L",
+   occurrence:"Never found free in nature — it's too reactive. Found combined in minerals like fluorite and cryolite.",
+   uses:["Fluoride toothpaste (cavity prevention)","Non-stick coatings (Teflon)","Refrigerant gases","Uranium enrichment"],
+   discovered:"1886 — Henri Moissan (first isolated)", origin:"Latin 'fluere': to flow, from fluorite ore used as a smelting flux.",
+   fact:"The most reactive element on the periodic table — it can even corrode glass and platinum.",
+   everyday:["Fluoride toothpaste","Non-stick (Teflon) frying pans"],
+   essential:{status:"trace",note:"Not essential, but topical fluoride helps strengthen tooth enamel."},
+   relatable:"Denser than air — heavier than the nitrogen/oxygen mix you're breathing."},
+  {z:10,sym:"Ne",name:"Neon",period:2,group:18,shells:[2,8],cat:"noble",ie:2081,en:null,val:0,mass:20.18,
+   state:"Gas",mp:-249,bp:-246,density:"0.90 g/L",
+   occurrence:"A trace gas in the atmosphere, separated out industrially by distilling liquid air.",
+   uses:["Neon signs &amp; lighting","Gas lasers","Cryogenic refrigerant"],
+   discovered:"1898 — William Ramsay &amp; Morris Travers", origin:"Greek 'neos': new.",
+   fact:"Glows a distinctive orange-red when electricity passes through it — the origin of 'neon lights'.",
+   everyday:["Neon shop signage"],
+   essential:{status:"no",note:"No known biological role."},
+   relatable:"Lighter than air, though not as dramatically as helium."},
+  {z:11,sym:"Na",name:"Sodium",period:3,group:1,shells:[2,8,1],cat:"metal",ie:496,en:0.93,val:1,mass:22.99,
+   state:"Solid",mp:98,bp:883,density:"0.97 g/cm³",
+   occurrence:"Never found free — far too reactive. Found combined in rock salt (halite) deposits and dissolved throughout seawater.",
+   uses:["Table salt (NaCl)","Soap manufacturing","Sodium-vapour street lights","Baking soda"],
+   discovered:"1807 — Humphry Davy", origin:"Symbol 'Na' from Latin 'natrium'; name from 'soda'.",
+   fact:"So reactive with water it can catch fire or even explode on contact.",
+   everyday:["Table salt","Baking soda","Soap"],
+   essential:{status:"yes",note:"An essential electrolyte for nerve signals and fluid balance."},
+   relatable:"Just under the density of water — similar to ice.",
+   srilanka:"The salt in your kitchen was very likely evaporated from seawater at Sri Lanka's coastal salterns, such as the Hambantota (Palatupana/Lewaya) and Puttalam salt pans."},
+  {z:12,sym:"Mg",name:"Magnesium",period:3,group:2,shells:[2,8,2],cat:"metal",ie:738,en:1.31,val:2,mass:24.31,
+   state:"Solid",mp:650,bp:1090,density:"1.74 g/cm³",
+   occurrence:"Found in minerals like dolomite and magnesite, and dissolved in seawater.",
+   uses:["Lightweight alloys for aircraft &amp; cars","Fireworks &amp; flares (bright white light)","Dietary supplements","Epsom salts"],
+   discovered:"1755 (recognised) — Joseph Black; isolated 1808 by Humphry Davy", origin:"From Magnesia, a region in Greece.",
+   fact:"Burns with such a bright white flame that it was used in early photography flashes.",
+   everyday:["Antacid tablets ('milk of magnesia')","Sparklers &amp; fireworks","Vitamin supplements"],
+   essential:{status:"yes",note:"Essential for hundreds of enzyme reactions, including energy production."},
+   relatable:"About two-thirds the density of aluminium — one reason it's used in lightweight alloys."},
+  {z:13,sym:"Al",name:"Aluminium",period:3,group:13,shells:[2,8,3],cat:"metal",ie:577,en:1.61,val:3,mass:26.98,
+   state:"Solid",mp:660,bp:2470,density:"2.70 g/cm³",
+   occurrence:"The most abundant metal in the Earth's crust, extracted from bauxite ore.",
+   uses:["Drink cans &amp; food packaging foil","Aircraft &amp; vehicle bodies","Window &amp; door frames","Electrical transmission cables"],
+   discovered:"1825 — Hans Christian Ørsted", origin:"Latin 'alumen': alum, a mineral salt known since antiquity.",
+   fact:"Was once so hard to extract that it was more precious than gold — until cheap electrolysis was invented.",
+   everyday:["Kitchen foil &amp; drink cans","Window frames","Cooking pots"],
+   essential:{status:"no",note:"No known essential biological role in humans."},
+   relatable:"Roughly a third the density of steel — why it's the metal of choice for aircraft and cans.",
+   srilanka:"Sri Lanka's Ratnapura region is world-famous for gem mining, and blue sapphires are essentially crystallised aluminium oxide (corundum) coloured by trace iron and titanium."},
+  {z:14,sym:"Si",name:"Silicon",period:3,group:14,shells:[2,8,4],cat:"metalloid",ie:786,en:1.90,val:4,mass:28.09,
+   state:"Solid",mp:1414,bp:3265,density:"2.33 g/cm³",
+   occurrence:"The second most abundant element in the Earth's crust, found in sand and quartz as silica (SiO₂) and in silicate rocks.",
+   uses:["Computer chips &amp; semiconductors","Glass-making","Solar panels","Silicone rubber &amp; sealants"],
+   discovered:"1824 — Jöns Jacob Berzelius", origin:"Latin 'silex': flint.",
+   fact:"Nearly every modern computer chip is built on it — the reason 'Silicon Valley' is named as it is.",
+   everyday:["Window glass","Computer &amp; phone chips","Beach sand"],
+   essential:{status:"trace",note:"Not established as essential in humans, though found in trace amounts in connective tissue."},
+   relatable:"Similar density to aluminium, but a completely different kind of solid — hard and brittle rather than metallic.",
+   srilanka:"Silica sand feeds Sri Lanka's local glass and ceramics industries, and silicon is one of the three elements (with potassium and aluminium) making up the prized 'Ceylon Moonstone'."},
+  {z:15,sym:"P",name:"Phosphorus",period:3,group:15,shells:[2,8,5],cat:"nonmetal",ie:1012,en:2.19,val:3,mass:30.97,
+   state:"Solid",mp:44,bp:280,density:"1.82 g/cm³",
+   occurrence:"Never found free in nature — always combined, chiefly in phosphate rock (apatite minerals).",
+   uses:["Fertilisers","Match heads","Steel &amp; detergent production","Essential in DNA &amp; bones (biological role)"],
+   discovered:"1669 — Hennig Brand", origin:"Greek 'phosphoros': light-bearer, since white phosphorus glows faintly in the dark.",
+   fact:"White phosphorus can spontaneously catch fire in air — hence its glowing, 'light-bearing' name.",
+   everyday:["Match heads","Fertiliser","Your own DNA &amp; bones"],
+   essential:{status:"yes",note:"Essential — found in DNA, cell membranes, and your bones."},
+   relatable:"Around 1.8× the density of water — comparable to some hard plastics.",
+   srilanka:"The Eppawala phosphate deposit in the North Central Province is Sri Lanka's own domestic source of phosphate rock, used to make local fertiliser."},
+  {z:16,sym:"S",name:"Sulfur",period:3,group:16,shells:[2,8,6],cat:"nonmetal",ie:1000,en:2.58,val:2,mass:32.07,
+   state:"Solid",mp:115,bp:445,density:"2.07 g/cm³",
+   occurrence:"One of the few nonmetals found free in nature, especially near volcanic vents and hot springs; also combined in minerals like gypsum and pyrite.",
+   uses:["Sulfuric acid production (the world's most-manufactured industrial chemical)","Fertilisers","Vulcanising rubber","Gunpowder"],
+   discovered:"Known since ancient times", origin:"Latin 'sulphurium'.",
+   fact:"The 'rotten egg' smell often blamed on sulfur is actually hydrogen sulfide, a compound it forms easily.",
+   everyday:["Match heads","Vulcanised rubber tyres","The smell near some hot springs"],
+   essential:{status:"yes",note:"Essential — found in two amino acids that build many of your proteins."},
+   relatable:"About twice as dense as water."},
+  {z:17,sym:"Cl",name:"Chlorine",period:3,group:17,shells:[2,8,7],cat:"nonmetal",ie:1251,en:3.16,val:1,mass:35.45,
+   state:"Gas",mp:-101,bp:-34,density:"3.2 g/L",
+   occurrence:"Never found free — always combined, chiefly as chloride ions in salt deposits and seawater.",
+   uses:["Disinfecting drinking water","Manufacturing PVC plastic","Bleach","Swimming pool sanitation"],
+   discovered:"1774 — Carl Wilhelm Scheele", origin:"Greek 'chloros': pale green, its gas colour.",
+   fact:"Used as a chemical weapon in WWI, yet its water-disinfecting use has saved far more lives than it ever took.",
+   everyday:["Chlorinated tap &amp; pool water","Bleach","PVC pipes"],
+   essential:{status:"yes",note:"An essential electrolyte, also used by your stomach to make digestive acid."},
+   relatable:"Roughly 2.5× denser than air — this is why chlorine gas sinks and pools dangerously in low areas, a real safety hazard.",
+   srilanka:"Sea salt (sodium chloride) harvested at Sri Lanka's Hambantota and Puttalam salterns is this element's most familiar local source."},
+  {z:18,sym:"Ar",name:"Argon",period:3,group:18,shells:[2,8,8],cat:"noble",ie:1521,en:null,val:0,mass:39.95,
+   state:"Gas",mp:-189,bp:-186,density:"1.78 g/L",
+   occurrence:"Makes up about 1% of the atmosphere — the most abundant noble gas on Earth — extracted from liquid air.",
+   uses:["Inert shielding gas for welding","Filling light bulbs","Preserving documents, artwork &amp; wine"],
+   discovered:"1894 — Lord Rayleigh &amp; William Ramsay", origin:"Greek 'argos': idle or lazy, describing its lack of reactivity.",
+   fact:"So unreactive that its name literally means 'the lazy one' in Greek.",
+   everyday:["Inside ordinary incandescent light bulbs"],
+   essential:{status:"no",note:"No known biological role."},
+   relatable:"Denser than air — used to safely displace oxygen in some packaging and welding applications."},
+  {z:19,sym:"K",name:"Potassium",period:4,group:1,shells:[2,8,8,1],cat:"metal",ie:419,en:0.82,val:1,mass:39.10,
+   state:"Solid",mp:63,bp:759,density:"0.89 g/cm³",
+   occurrence:"Never found free — too reactive. Found in mineral deposits like sylvite and carnallite, and dissolved in seawater.",
+   uses:["Potash fertilisers","Essential electrolyte for nerve &amp; muscle function","Soap &amp; glass manufacturing"],
+   discovered:"1807 — Humphry Davy", origin:"Symbol 'K' from Latin 'kalium'; name from 'potash' (pot ash).",
+   fact:"Reacts with water even more violently than sodium does, often igniting instantly.",
+   everyday:["Bananas &amp; other fruit","Fertiliser bags"],
+   essential:{status:"yes",note:"An essential electrolyte for nerve signals and heart function."},
+   relatable:"Less dense than water — soft enough to be cut with a knife.",
+   srilanka:"The famous 'Ceylon Moonstone', mined at Meetiyagoda, is a potassium-aluminium-silicate feldspar mineral."},
+  {z:20,sym:"Ca",name:"Calcium",period:4,group:2,shells:[2,8,8,2],cat:"metal",ie:590,en:1.00,val:2,mass:40.08,
+   state:"Solid",mp:842,bp:1484,density:"1.55 g/cm³",
+   occurrence:"Never found free — always combined, chiefly in limestone, chalk and marble (calcium carbonate) and in gypsum.",
+   uses:["Cement &amp; concrete","Building stone (limestone/marble)","Bones &amp; teeth (biological role)","Dietary supplements"],
+   discovered:"1808 — Humphry Davy", origin:"Latin 'calx': lime.",
+   fact:"Vital for muscle contraction and nerve signalling in the body — not just bones and teeth.",
+   everyday:["Milk &amp; dairy","Chalk","Cement &amp; concrete","Your own bones &amp; teeth"],
+   essential:{status:"yes",note:"Essential for bones, teeth, muscle contraction and nerve signalling."},
+   relatable:"About one and a half times denser than water.",
+   srilanka:"Limestone deposits around Puttalam feed Sri Lanka's cement industry (e.g. the INSEE and Holcim plants), making this a very locally-sourced element."},
+];
+const CAT_COLOR = {metal:"var(--metal)", metalloid:"var(--metalloid)", nonmetal:"var(--nonmetal)", noble:"var(--noble)"};
+
+// ============================================================
+// GRID RENDER
+// ============================================================
+const gridEl = document.getElementById('grid');
+let mode = "category";
+let selected = ELEMENTS[5]; // carbon by default
+
+function colorForMode(el){
+  if(mode==="category") return CAT_COLOR[el.cat];
+  if(mode==="ie"){
+    const t = (el.ie-419)/(2372-419);
+    return `hsl(${170-140*t},65%,${52-14*t}%)`;
+  }
+  if(mode==="en"){
+    if(el.en===null) return "#c9c3b2";
+    const t = (el.en-0.82)/(3.98-0.82);
+    return `hsl(${200-160*t},65%,${52-14*t}%)`;
+  }
+}
+
+function buildGrid(){
+  gridEl.innerHTML = "";
+  for(let p=1;p<=4;p++){
+    for(let g=1;g<=18;g++){
+      const el = ELEMENTS.find(e=>e.period===p && e.group===g);
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (el?'':' empty');
+      if(el){
+        cell.style.background = colorForMode(el);
+        cell.innerHTML = `<div class="z">${el.z}</div><div class="sym">${el.sym}</div>`;
+        if(selected && el.z===selected.z) cell.classList.add('selected');
+        cell.onclick = ()=>{ selected = el; render(); };
+      }
+      gridEl.appendChild(cell);
+    }
+  }
+}
+
+function buildLegend(){
+  const leg = document.getElementById('legend');
+  if(mode==="category"){
+    leg.innerHTML = Object.entries(CAT_COLOR).map(([k,c])=>`<span><i class="sw" style="background:${c}"></i>${k}</span>`).join("");
+  } else if(mode==="ie"){
+    leg.innerHTML = `<span><i class="sw" style="background:hsl(170,65%,52%)"></i>low</span><span><i class="sw" style="background:hsl(30,65%,38%)"></i>high</span>`;
+  } else {
+    leg.innerHTML = `<span><i class="sw" style="background:hsl(200,65%,52%)"></i>low</span><span><i class="sw" style="background:hsl(40,65%,38%)"></i>high (excl. noble gases)</span>`;
+  }
+}
+
+document.querySelectorAll('.modebtn').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.modebtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    mode = b.dataset.mode;
+    render();
+  };
+});
+
+// ============================================================
+// BOHR MODEL ANIMATION
+// ============================================================
+let bohrCanvas, bctx, bohrAngle=0;
+function drawBohr(el){
+  const size = 240;
+  bctx.clearRect(0,0,size,size);
+  const cx=size/2, cy=size/2;
+  const shellGap = 26;
+  bctx.fillStyle="#1f2430";
+  bctx.beginPath(); bctx.arc(cx,cy,14,0,Math.PI*2); bctx.fill();
+  bctx.fillStyle="#fff"; bctx.font="700 11px 'JetBrains Mono', monospace"; bctx.textAlign="center"; bctx.textBaseline="middle";
+  bctx.fillText("+"+el.z, cx, cy+1);
+
+  el.shells.forEach((count, idx)=>{
+    const r = 26 + idx*shellGap;
+    bctx.strokeStyle = "#d8d4c8"; bctx.lineWidth=1.2;
+    bctx.beginPath(); bctx.arc(cx,cy,r,0,Math.PI*2); bctx.stroke();
+    for(let i=0;i<count;i++){
+      const ang = bohrAngle*(idx%2===0?1:-1)*(0.6+idx*0.15) + (i/count)*Math.PI*2;
+      const ex = cx + r*Math.cos(ang), ey = cy + r*Math.sin(ang);
+      bctx.fillStyle = CAT_COLOR[el.cat].startsWith('var')? getComputedStyle(document.documentElement).getPropertyValue('--'+el.cat).trim() : CAT_COLOR[el.cat];
+      bctx.beginPath(); bctx.arc(ex,ey,4.5,0,Math.PI*2); bctx.fill();
+    }
+  });
+}
+function animateBohr(){
+  bohrAngle += 0.012;
+  if(selected) drawBohr(selected);
+  requestAnimationFrame(animateBohr);
+}
+
+// ============================================================
+// TREND MINI-GRAPH (across the selected element's period)
+// ============================================================
+function drawTrendGraph(canvas, el, key, unit){
+  const ctx = canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const rowEls = ELEMENTS.filter(e=>e.period===el.period && e[key]!==null).sort((a,b)=>a.group-b.group);
+  if(rowEls.length<2) return;
+  const vals = rowEls.map(e=>e[key]);
+  const vMin = Math.min(...vals), vMax = Math.max(...vals);
+  ctx.strokeStyle="#e5e1d3"; ctx.lineWidth=1;
+  for(let i=1;i<3;i++){ const y=h*i/3; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  ctx.strokeStyle="#0e8f7f"; ctx.lineWidth=2.2; ctx.beginPath();
+  rowEls.forEach((e,i)=>{
+    const x = (i/(rowEls.length-1))*(w-20)+10;
+    const y = h-14 - ((e[key]-vMin)/((vMax-vMin)||1))*(h-28);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  rowEls.forEach((e,i)=>{
+    const x = (i/(rowEls.length-1))*(w-20)+10;
+    const y = h-14 - ((e[key]-vMin)/((vMax-vMin)||1))*(h-28);
+    ctx.fillStyle = e.z===el.z ? "#c14e3a" : "#0e8f7f";
+    ctx.beginPath(); ctx.arc(x,y, e.z===el.z?5:3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle="#6b7280"; ctx.font="9px 'JetBrains Mono', monospace"; ctx.textAlign="center";
+    ctx.fillText(e.sym, x, h-2);
+  });
+}
+
+// ============================================================
+// PANEL RENDER
+// ============================================================
+function render(){
+  buildGrid();
+  buildLegend();
+  const panel = document.getElementById('panel');
+  const el = selected;
+  panel.innerHTML = `
+    <div class="elname">${el.name} (${el.sym})</div>
+    <div class="elmeta">Atomic number ${el.z} · Period ${el.period} · Group ${el.group} · <span style="color:${CAT_COLOR[el.cat]};font-weight:600;">${el.cat}</span></div>
+    <div class="bohr-wrap"><canvas id="bohrCanvas" width="240" height="240"></canvas></div>
+
+    <div class="section-label">You've probably encountered this</div>
+    <div class="everyday-chips">${el.everyday.map(x=>`<span class="everyday-chip">${x}</span>`).join('')}</div>
+    <div class="essential-badge ${el.essential.status}">${el.essential.status==='yes'?'🧬 Essential for life':el.essential.status==='trace'?'🌱 Trace / limited role':'⚪ No biological role'}</div>
+    <div class="essential-note">${el.essential.note}</div>
+
+    <div class="section-label">Atomic data</div>
+    <div class="info-row"><span class="k">Relative atomic mass</span><span class="mono">${el.mass}</span></div>
+    <div class="info-row"><span class="k">Electron configuration</span><span class="mono">${el.shells.join(',')}</span></div>
+    <div class="info-row"><span class="k">Valency</span><span class="mono">${el.val}</span></div>
+    <div class="info-row"><span class="k">First ionization energy</span><span class="mono">${el.ie} kJ/mol</span></div>
+    <div class="info-row"><span class="k">Electronegativity</span><span class="mono">${el.en===null?'— (noble gas)':el.en}</span></div>
+
+    <div class="section-label">Physical properties</div>
+    <div class="phys-grid">
+      <div class="phys-stat"><div class="k">State (25°C)</div><div class="v">${el.state}</div></div>
+      <div class="phys-stat"><div class="k">Density</div><div class="v">${el.density}</div></div>
+      <div class="phys-stat"><div class="k">Melting point</div><div class="v">${el.mp}°C</div></div>
+      <div class="phys-stat"><div class="k">Boiling point</div><div class="v">${el.bp}°C</div></div>
+    </div>
+    <div class="relatable-note">${el.relatable}</div>
+
+    <div class="section-label">Where it comes from</div>
+    <div class="elem-context">
+      <div class="ec-row"><span class="ec-k">Found in nature</span><div class="ec-v">${el.occurrence}</div></div>
+      <div class="ec-row"><span class="ec-k">Common uses</span><div class="ec-v"><ul>${el.uses.map(u=>`<li>${u}</li>`).join('')}</ul></div></div>
+    </div>
+    ${el.srilanka ? `<div class="sl-box"><span class="lbl">🇱🇰 In Sri Lanka</span>${el.srilanka}</div>` : ''}
+
+    <div class="section-label">History &amp; name origin</div>
+    <div class="elem-context">
+      <div class="ec-row"><span class="ec-k">Discovered</span><div class="ec-v">${el.discovered}</div></div>
+      <div class="ec-row"><span class="ec-k">Name origin</span><div class="ec-v">${el.origin}</div></div>
+    </div>
+
+    <div class="fact-box"><span class="lbl">💡 Did you know?</span>${el.fact}</div>
+
+    <div class="trend-title">Ionization energy across Period ${el.period}</div>
+    <canvas id="ieTrend" width="280" height="90"></canvas>
+    <div class="trend-title">Electronegativity across Period ${el.period}</div>
+    <canvas id="enTrend" width="280" height="90"></canvas>
+  `;
+  bohrCanvas = document.getElementById('bohrCanvas');
+  bctx = bohrCanvas.getContext('2d');
+  drawTrendGraph(document.getElementById('ieTrend'), el, 'ie');
+  drawTrendGraph(document.getElementById('enTrend'), el, 'en');
+}
+
+render();
+animateBohr();
+</script>
+</body>
+</html>

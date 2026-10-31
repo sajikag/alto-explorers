@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bringing Tony Home — Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ef; --ink:#1f2430; --ink-dim:#6b7280; --rule:#dcd7c9;
+    --accent:#8a5a2b; --accent-dim:#f0e3d1; --card:#ffffff; --good:#2f7d32; --bad:#c14e3a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;padding:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 2px;}
+  .byline{color:var(--ink-dim);font-size:13px;margin-bottom:2px;}
+  .sub{color:var(--ink-dim);font-size:12.5px;margin-bottom:16px;}
+  .wrap{max-width:960px;margin:0 auto;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;}
+  .tab{padding:9px 16px;border-radius:10px 10px 0 0;background:#ece5d9;color:var(--ink-dim);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--rule);border-bottom:none;}
+  .tab.active{background:var(--card);color:var(--ink);}
+  .panel{display:none;background:var(--card);border:1px solid var(--rule);border-radius:0 12px 12px 12px;padding:22px;}
+  .panel.active{display:block;}
+
+  .context-box{background:var(--accent-dim);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;font-size:13px;margin-bottom:18px;}
+
+  /* TIMELINE */
+  .timeline{display:flex;overflow-x:auto;gap:0;margin-bottom:18px;padding-bottom:6px;}
+  .tl-node{flex:0 0 auto;width:150px;text-align:center;cursor:pointer;position:relative;padding:0 6px;}
+  .tl-dot{width:16px;height:16px;border-radius:50%;background:var(--rule);border:3px solid var(--card);margin:0 auto 8px;position:relative;z-index:2;}
+  .tl-node.active .tl-dot{background:var(--accent);}
+  .tl-line{position:absolute;top:8px;left:-50%;width:100%;height:2px;background:var(--rule);z-index:1;}
+  .tl-node:first-child .tl-line{display:none;}
+  .tl-label{font-size:11px;color:var(--ink-dim);font-weight:600;}
+  .tl-node.active .tl-label{color:var(--accent);}
+  .stage-detail{background:#faf5ec;border:1px solid var(--rule);border-radius:10px;padding:16px 18px;}
+  .stage-detail h3{margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-size:15px;}
+  .stage-detail p{font-size:13.5px;line-height:1.6;margin:0;color:var(--ink);}
+  .part-tag{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:700;margin-bottom:6px;}
+
+  /* CHARACTERS & THEMES */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .info-card{background:#faf5ec;border:1px solid var(--rule);border-radius:12px;padding:16px;}
+  .info-card h3{margin:0 0 6px;font-family:'Space Grotesk',sans-serif;font-size:14.5px;}
+  .info-card p{font-size:13px;line-height:1.55;color:var(--ink-dim);margin:0;}
+  .info-card .tag{display:inline-block;font-size:10px;background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:10px;margin-bottom:8px;font-weight:700;}
+
+  /* QUIZ */
+  .qcard{background:#faf5ec;border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+  .qtext{font-size:14px;font-weight:600;margin-bottom:10px;}
+  .opt{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;border:1px solid var(--rule);background:#fff;margin-bottom:6px;font-size:13px;cursor:pointer;color:var(--ink);}
+  .opt.correct{background:#e3f2e3;border-color:var(--good);font-weight:600;}
+  .opt.incorrect{background:#f6e2df;border-color:var(--bad);}
+  .opt:disabled{cursor:default;}
+  .qscore{position:sticky;top:0;background:var(--card);padding:10px 0;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+  .resetq{margin-top:8px;padding:9px 16px;border-radius:8px;border:1px solid var(--rule);background:var(--card);cursor:pointer;font-weight:600;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bringing Tony Home</h1>
+  <div class="byline">Tissa Abeysekara — O/L English Literature (prescribed novel)</div>
+  <div class="sub">Chapter, character &amp; theme review, plus a self-test quiz</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="timeline">Plot Timeline</div>
+    <div class="tab" data-tab="characters">Characters</div>
+    <div class="tab" data-tab="themes">Themes</div>
+    <div class="tab" data-tab="quiz">Review Quiz</div>
+  </div>
+
+  <div class="panel active" id="panel-timeline">
+    <div class="context-box"><strong>Context:</strong> Set in Ceylon in the late 1940s, just after independence from British rule. The novella is semi-autobiographical and told by an adult narrator looking back on a pivotal childhood memory.</div>
+    <div class="timeline" id="timeline"></div>
+    <div class="stage-detail" id="stageDetail"></div>
+  </div>
+
+  <div class="panel" id="panel-characters">
+    <div class="card-grid" id="charGrid"></div>
+  </div>
+
+  <div class="panel" id="panel-themes">
+    <div class="card-grid" id="themeGrid"></div>
+  </div>
+
+  <div class="panel" id="panel-quiz">
+    <div class="qscore" id="qscore">Score: 0 / 10</div>
+    <div id="quizList"></div>
+    <button class="resetq" id="resetQuiz">Reset Quiz</button>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  };
+});
+
+// ============================================================
+// PLOT TIMELINE
+// ============================================================
+const STAGES = [
+  {part:"Part I", label:"Life at the Mahagedara", title:"A Fading World of Privilege",
+   text:"The story opens in the narrator's childhood home — a large ancestral house that represents his family's status, stability, and heritage. But the family's fortunes are already quietly declining."},
+  {part:"Part I", label:"Financial Ruin", title:"Selling the Estate",
+   text:"Unable to keep up their old way of life, the parents are forced to sell the family estate and prepare to move to a small, ordinary house in Egodawatta. The grandeur of the past is collapsing."},
+  {part:"Part I", label:"The Abandonment", title:"Leaving Tony Behind",
+   text:"Because the family cannot afford to transport their loyal dog, Tony, to the new house, they leave him behind. As their van pulls away, Tony chases after it until he's left as a distant speck on the road — a moment that scars the boy deeply."},
+  {part:"Part II", label:"Settling In", title:"A Smaller, Harder Life",
+   text:"The family adjusts to their cramped new home in Egodawatta, a stark contrast to their spacious old estate. It's a place of confinement rather than the freedom they once knew."},
+  {part:"Part II", label:"The Boy's Guilt", title:"Haunted by Tony",
+   text:"While his parents worry about money and status, the boy is consumed by guilt over Tony. He begins to imagine he can hear Tony barking at night — his grief becomes almost hallucinatory. His parents never speak of the dog."},
+  {part:"Part II", label:"The Decision", title:"Bringing Tony Home",
+   text:"The boy's longing eventually becomes too strong to ignore, and the family resolves to go back for Tony. This marks the story's turn from passive grief toward an active attempt at redemption."}
+];
+let selectedStage = 2;
+
+function buildTimeline(){
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = "";
+  STAGES.forEach((s,i)=>{
+    const node = document.createElement('div');
+    node.className = 'tl-node' + (i===selectedStage?' active':'');
+    node.innerHTML = `<div class="tl-line"></div><div class="tl-dot"></div><div class="tl-label">${s.label}</div>`;
+    node.onclick = ()=>{ selectedStage=i; renderTimeline(); };
+    tl.appendChild(node);
+  });
+}
+function renderTimeline(){
+  buildTimeline();
+  const s = STAGES[selectedStage];
+  document.getElementById('stageDetail').innerHTML = `<div class="part-tag">${s.part}</div><h3>${s.title}</h3><p>${s.text}</p>`;
+}
+renderTimeline();
+
+// ============================================================
+// CHARACTERS
+// ============================================================
+const CHARACTERS = [
+  {tag:"Narrator", name:"The Boy / Adult Narrator", fn:"The story is told from his adult perspective, looking back at himself as a lonely child. His journey — from passive grief to active guilt to eventual maturity — drives the whole novella."},
+  {tag:"Companion", name:"Tony", fn:"The family's loyal dog. He represents unconditional loyalty and love in a household increasingly consumed by status and survival. His abandonment and physical suffering mirror the family's own decline."},
+  {tag:"Family", name:"The Parents", fn:"Proud but financially ruined, they try to maintain appearances while their world collapses. Leaving Tony behind isn't cruelty — it's desperation. The boy eventually realises they are victims of circumstance too."}
+];
+document.getElementById('charGrid').innerHTML = CHARACTERS.map(c=>`
+  <div class="info-card"><span class="tag">${c.tag}</span><h3>${c.name}</h3><p>${c.fn}</p></div>
+`).join('');
+
+// ============================================================
+// THEMES
+// ============================================================
+const THEMES = [
+  {tag:"Theme 1", name:"Socio-Economic Transition", fn:"The novella reflects the decline of the English-speaking, land-owning class in newly-independent Ceylon. The old house symbolises a fading feudal status; the move to Egodawatta symbolises descent into ordinary, urban anonymity."},
+  {tag:"Theme 2", name:"The Human-Animal Bond", fn:"Tony represents loyalty and unconditional love — everything the adult world, preoccupied with money and appearances, seems to have lost. His physical decline mirrors the family's emotional and financial unraveling."},
+  {tag:"Theme 3", name:"Nostalgia &amp; Memory", fn:"Told retrospectively by an adult narrator, the novella suggests memory works like a filter — emotions feel sharper in hindsight. The title is ironic: Tony can be physically brought home, but the childhood 'home' he represents cannot."},
+  {tag:"Theme 4", name:"Loss of Innocence", fn:"The boy moves from being a protected, passive observer to someone who has confronted real loss and guilt — and who realises, painfully, that his parents are fallible people shaped by circumstance, not all-powerful protectors."}
+];
+document.getElementById('themeGrid').innerHTML = THEMES.map(t=>`
+  <div class="info-card"><span class="tag">${t.tag}</span><h3>${t.name}</h3><p>${t.fn}</p></div>
+`).join('');
+
+// ============================================================
+// QUIZ
+// ============================================================
+const QUIZ = [
+  {q:"Who wrote 'Bringing Tony Home'?", opts:["R. K. Narayan","Tissa Abeysekara","Mark Twain","Michael Ondaatje"], a:1},
+  {q:"In what period is the novella primarily set?", opts:["The 1930s","The late 1940s, just after independence","The 1970s","The 1990s"], a:1},
+  {q:"Why couldn't the family take Tony with them when they moved?", opts:["Tony ran away before the move","They couldn't afford to transport him — financial hardship","Their new landlord banned pets","Tony had become too aggressive"], a:1},
+  {q:"What is the name of the smaller house the family moves to?", opts:["Malgudi","Egodawatta","Mahagedara","Kandy"], a:1},
+  {q:"How does the boy cope with his guilt after leaving Tony behind?", opts:["He quickly forgets about Tony","He begins to hallucinate, hearing Tony bark at night","He runs away from home to find Tony immediately","He openly blames his parents"], a:1},
+  {q:"What does the title 'Bringing Tony Home' ironically suggest?", opts:["That Tony is never actually found","That the dog can be brought back, but the lost childhood/home cannot","That the family moves back to their original house","That Tony brings the family financial luck"], a:1},
+  {q:"What does the old family house mainly symbolise in the story?", opts:["Corruption","Feudal status, heritage, and stability","Danger","Modern progress"], a:1},
+  {q:"From what point of view is the story narrated?", opts:["Third-person omniscient", "A first-person adult narrator recalling his childhood", "Second-person, addressing the reader directly", "An unnamed outside observer"], a:1},
+  {q:"Which theme centres on the boy realising his parents are not all-powerful, but victims of circumstance?", opts:["Nostalgia and memory","Loss of innocence","The human-animal bond","Socio-economic transition"], a:1},
+  {q:"What best describes the family's reason for leaving Tony, according to the story?", opts:["Cruelty and indifference","Desperation caused by financial ruin, not malice","A deliberate lesson for the boy","Tony's own choice to stay behind"], a:1}
+];
+let score = 0;
+
+function buildQuiz(){
+  score = 0;
+  document.getElementById('qscore').textContent = `Score: 0 / ${QUIZ.length}`;
+  const list = document.getElementById('quizList');
+  list.innerHTML = "";
+  QUIZ.forEach((item,qi)=>{
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    card.innerHTML = `<div class="qtext">${qi+1}. ${item.q}</div>` +
+      item.opts.map((o,oi)=>`<button class="opt" data-q="${qi}" data-o="${oi}">${o}</button>`).join('');
+    list.appendChild(card);
+  });
+  list.querySelectorAll('.opt').forEach(btn=>{
+    btn.onclick = ()=>{
+      const qi = +btn.dataset.q, oi = +btn.dataset.o;
+      const card = btn.closest('.qcard');
+      const buttons = card.querySelectorAll('.opt');
+      buttons.forEach(b=>b.disabled = true);
+      if(oi === QUIZ[qi].a){
+        btn.classList.add('correct');
+        score++;
+      } else {
+        btn.classList.add('incorrect');
+        buttons[QUIZ[qi].a].classList.add('correct');
+      }
+      document.getElementById('qscore').textContent = `Score: ${score} / ${QUIZ.length}`;
+    };
+  });
+}
+document.getElementById('resetQuiz').onclick = buildQuiz;
+buildQuiz();
+</script>
+</body>
+</html>

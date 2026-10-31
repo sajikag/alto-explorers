@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explore — Interactive Learning Simulations</title>
+<style>
+  :root {
+    --ink: #1c2530;
+    --paper: #f6f4ee;
+    --sea: #dbe9f0;
+    --card: #ffffff;
+    --line: #d8d2c0;
+    --accent: #c65b3a;
+    --accent2: #2e7d6b;
+    --muted: #7a7364;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 20px 80px; }
+  header { text-align: center; margin-bottom: 44px; }
+  header h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: 0.2px; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  h2.section {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+    margin: 40px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+  a.card {
+    display: block; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; text-decoration: none; color: inherit;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  a.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    border-color: var(--accent);
+  }
+  .card .icon { font-size: 26px; line-height: 1; margin-bottom: 10px; }
+  .card h3 { font-size: 15.5px; margin: 0 0 6px; }
+  .card p { font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .card .tag {
+    display: inline-block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--sea); color: #2c5266; border-radius: 4px; padding: 2px 7px; margin-top: 10px;
+  }
+  .card .tag.sci { background: #ede3f2; color: #6b3f7a; }
+  .card .tag.lit { background: #f3e6df; color: #8a4a2c; }
+  .card .tag.game { background: #fdecc8; color: #9a6a12; }
+
+  footer { text-align: center; margin-top: 56px; font-size: 11.5px; color: var(--muted); }
+  footer a { color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Explore<span>.</span></h1>
+    <p>A small collection of interactive learning simulations — click a card to open it.</p>
+  </header>
+
+  <h2 class="section">Grade 1 Games</h2>
+  <div class="grid">
+    <a class="card" href="space-learning-games.html">
+      <div class="icon">🚀</div>
+      <h3>Star Cadet Academy</h3>
+      <p>Twelve space-themed math &amp; reading missions for early learners — number lines, ten-frames, sight words, rhymes, and more. No timers, no losing, just stars.</p>
+      <span class="tag game">Math &amp; Reading</span>
+    </a>
+  </div>
+
+  <h2 class="section">Geography &amp; Space</h2>
+  <div class="grid">
+    <a class="card" href="World_Map_Explorer_Prototype.html">
+      <div class="icon">🗺️</div>
+      <h3>World Map Explorer</h3>
+      <p>Click-to-zoom interactive world map — countries, rivers &amp; mountains, languages, animal habitats, and real sports/World Cup participation, all drawn as real shapes.</p>
+      <span class="tag">Prototype</span>
+    </a>
+    <a class="card" href="World_Countries_Trivia_Game.html">
+      <div class="icon">🌍</div>
+      <h3>World Countries Trivia</h3>
+      <p>A shuffled quiz across 196 countries — flags, capitals, landmarks, food, language, and traditions. Pick a category and question count, then play.</p>
+      <span class="tag">Game</span>
+    </a>
+    <a class="card" href="solar_system.html">
+      <div class="icon">🪐</div>
+      <h3>Solar System Explorer</h3>
+      <p>A 3D solar system you can orbit and zoom — click any planet, moon, or the asteroid belt for its stats, and toggle between compact and real orbital scale.</p>
+      <span class="tag">Astronomy</span>
+    </a>
+  </div>
+
+  <h2 class="section">O/L Study Labs</h2>
+  <div class="grid">
+    <a class="card" href="biology_cell_explorer.html">
+      <div class="icon">🌿</div>
+      <h3>Plant &amp; Animal Cell Explorer</h3>
+      <p>Click any organelle in a plant or animal cell to learn what it does, compare the two side by side, and step through the phases of mitosis.</p>
+      <span class="tag sci">Biology</span>
+    </a>
+    <a class="card" href="chemistry_atomic_structure_explorer.html">
+      <div class="icon">⚛️</div>
+      <h3>Atomic Structure &amp; Periodic Trends</h3>
+      <p>Click any element for its Bohr model and electron configuration, and colour the periodic table by category, ionization energy, or electronegativity.</p>
+      <span class="tag sci">Chemistry</span>
+    </a>
+    <a class="card" href="physics_forces_motion_lab.html">
+      <div class="icon">🎯</div>
+      <h3>Forces &amp; Motion Lab</h3>
+      <p>Tune mass, applied force, and friction to watch Newton's laws play out live, then run elastic and inelastic cart collisions and check momentum conservation.</p>
+      <span class="tag sci">Physics</span>
+    </a>
+    <a class="card" href="english_sentence_structure_lab.html">
+      <div class="icon">✍️</div>
+      <h3>Sentence Structure Lab</h3>
+      <p>Sentence types and clauses, then flip cards between active/passive voice and direct/indirect speech to see exactly how each transformation works.</p>
+      <span class="tag sci">English</span>
+    </a>
+  </div>
+
+  <h2 class="section">O/L Literature</h2>
+  <div class="grid">
+    <a class="card" href="literature_bringing_tony_home_review.html">
+      <div class="icon">📖</div>
+      <h3>Bringing Tony Home — Review</h3>
+      <p>Tissa Abeysekara's prescribed novella — plot timeline, characters, and themes, plus a self-test review quiz to check what's stuck.</p>
+      <span class="tag lit">Literature</span>
+    </a>
+  </div>
+
+  <footer>
+    Built by Altovian &middot; hosted on <a href="https://altovian-dev.github.io/explore/world/">GitHub Pages</a>
+  </footer>
+</div>
+</body>
+</html>

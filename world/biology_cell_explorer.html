@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant &amp; Animal Cell Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ef; --ink:#1f2430; --ink-dim:#6b7280; --rule:#dcd7c9;
+    --accent:#2f7d32; --accent-dim:#dcecdc; --card:#ffffff; --highlight:#c14e3a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;padding:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 2px;}
+  .sub{color:var(--ink-dim);font-size:13px;margin-bottom:18px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:1040px;margin:0 auto;}
+
+  .cells-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+  @media (max-width:760px){ .cells-row{grid-template-columns:1fr;} }
+  .cell-card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px;}
+  .cell-card h2{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 10px;}
+  svg{width:100%;height:auto;display:block;}
+  .organelle{cursor:pointer;}
+  .organelle:hover{filter:brightness(1.08);}
+  .organelle.active{filter:drop-shadow(0 0 0 2px var(--highlight));}
+  .organelle.active > *{stroke:var(--highlight)!important;stroke-width:3px;}
+
+  .info-panel{background:var(--accent-dim);border:1px solid var(--accent);border-radius:12px;padding:16px 18px;margin-bottom:18px;min-height:80px;}
+  .info-panel .name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;margin-bottom:2px;}
+  .info-panel .found{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);font-weight:700;margin-bottom:6px;}
+  .info-panel .fn{font-size:13.5px;line-height:1.5;}
+  .info-panel .placeholder{color:var(--ink-dim);font-size:13px;}
+
+  table.compare{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin-bottom:18px;}
+  table.compare th, table.compare td{padding:10px 14px;text-align:left;font-size:13px;border-bottom:1px solid var(--rule);}
+  table.compare th{background:#faf9f5;color:var(--ink-dim);font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+  table.compare tr:last-child td{border-bottom:none;}
+  .yes{color:var(--accent);font-weight:700;}
+  .no{color:var(--ink-dim);}
+
+  .mitosis-card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:18px;}
+  .mitosis-card h2{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 12px;}
+  .stage-btns{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .stage-btn{padding:8px 14px;border-radius:20px;border:1px solid var(--rule);background:#faf9f5;font-size:12.5px;cursor:pointer;color:var(--ink-dim);font-weight:600;}
+  .stage-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  #mitosisCanvas{width:100%;max-width:600px;display:block;margin:0 auto;background:#faf9f5;border-radius:10px;border:1px solid var(--rule);}
+  .stage-desc{text-align:center;font-size:13px;color:var(--ink-dim);margin-top:10px;max-width:520px;margin-left:auto;margin-right:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Plant &amp; Animal Cell Explorer</h1>
+  <div class="sub">O/L Biology — cell structure, organelle function, and cell division</div>
+
+  <div class="info-panel" id="infoPanel">
+    <div class="placeholder">Click any organelle in either cell below to learn what it does.</div>
+  </div>
+
+  <div class="cells-row">
+    <div class="cell-card">
+      <h2>🌿 Plant Cell</h2>
+      <svg viewBox="0 0 320 260">
+        <!-- cell wall -->
+        <g class="organelle" data-o="wall">
+          <rect x="8" y="8" width="304" height="244" rx="22" fill="none" stroke="#5a7d3c" stroke-width="7"/>
+        </g>
+        <!-- membrane / cytoplasm fill -->
+        <g class="organelle" data-o="cytoplasm">
+          <rect x="18" y="18" width="284" height="224" rx="16" fill="#eaf3e2" stroke="#9db98a" stroke-width="2"/>
+        </g>
+        <!-- large central vacuole -->
+        <g class="organelle" data-o="vacuole">
+          <ellipse cx="205" cy="150" rx="88" ry="72" fill="#cfe8f2" stroke="#7fb6cc" stroke-width="2"/>
+        </g>
+        <!-- chloroplasts -->
+        <g class="organelle" data-o="chloroplast">
+          <ellipse cx="60" cy="55" rx="20" ry="12" fill="#4caf50" stroke="#2f7d32" stroke-width="1.5"/>
+          <ellipse cx="95" cy="90" rx="20" ry="12" fill="#4caf50" stroke="#2f7d32" stroke-width="1.5"/>
+          <ellipse cx="50" cy="120" rx="20" ry="12" fill="#4caf50" stroke="#2f7d32" stroke-width="1.5"/>
+          <ellipse cx="65" cy="190" rx="20" ry="12" fill="#4caf50" stroke="#2f7d32" stroke-width="1.5"/>
+          <ellipse cx="110" cy="215" rx="20" ry="12" fill="#4caf50" stroke="#2f7d32" stroke-width="1.5"/>
+        </g>
+        <!-- mitochondria -->
+        <g class="organelle" data-o="mito">
+          <ellipse cx="150" cy="55" rx="16" ry="9" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(20 150 55)"/>
+          <ellipse cx="255" cy="55" rx="16" ry="9" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(-15 255 55)"/>
+          <ellipse cx="245" cy="225" rx="16" ry="9" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(10 245 225)"/>
+        </g>
+        <!-- golgi -->
+        <g class="organelle" data-o="golgi">
+          <path d="M 40 155 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+          <path d="M 40 163 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+          <path d="M 40 171 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+        </g>
+        <!-- ER -->
+        <g class="organelle" data-o="er">
+          <path d="M 190 45 q 15 15 0 30 q -15 15 0 30 q 15 15 0 30" fill="none" stroke="#8858c9" stroke-width="2.2"/>
+        </g>
+        <!-- ribosomes -->
+        <g class="organelle" data-o="ribosome">
+          <circle cx="180" cy="40" r="2.6" fill="#333"/><circle cx="200" cy="60" r="2.6" fill="#333"/>
+          <circle cx="170" cy="70" r="2.6" fill="#333"/><circle cx="185" cy="110" r="2.6" fill="#333"/>
+          <circle cx="220" cy="30" r="2.6" fill="#333"/><circle cx="40" cy="90" r="2.6" fill="#333"/>
+        </g>
+        <!-- nucleus -->
+        <g class="organelle" data-o="nucleus">
+          <circle cx="120" cy="150" r="32" fill="#a78bcf" stroke="#6f4fa3" stroke-width="2.5"/>
+          <circle cx="128" cy="145" r="8" fill="#6f4fa3"/>
+        </g>
+        <!-- membrane click layer (outer, thin) -->
+        <g class="organelle" data-o="membrane">
+          <rect x="18" y="18" width="284" height="224" rx="16" fill="none" stroke="#5a7d3c" stroke-width="0"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cell-card">
+      <h2>🔴 Animal Cell</h2>
+      <svg viewBox="0 0 320 260">
+        <!-- membrane / irregular blob -->
+        <g class="organelle" data-o="membrane">
+          <path d="M 160 15
+                   C 230 10, 300 45, 305 110
+                   C 310 160, 290 210, 235 235
+                   C 180 258, 100 250, 55 215
+                   C 15 185, 8 130, 25 85
+                   C 42 40, 100 20, 160 15 Z"
+                fill="#fbe4e0" stroke="#d98a78" stroke-width="4"/>
+        </g>
+        <g class="organelle" data-o="cytoplasm">
+          <path d="M 160 15
+                   C 230 10, 300 45, 305 110
+                   C 310 160, 290 210, 235 235
+                   C 180 258, 100 250, 55 215
+                   C 15 185, 8 130, 25 85
+                   C 42 40, 100 20, 160 15 Z"
+                fill="#fbe4e0"/>
+        </g>
+        <!-- small vacuoles -->
+        <g class="organelle" data-o="vacuole">
+          <circle cx="80" cy="70" r="10" fill="#cfe8f2" stroke="#7fb6cc" stroke-width="1.5"/>
+          <circle cx="240" cy="90" r="8" fill="#cfe8f2" stroke="#7fb6cc" stroke-width="1.5"/>
+          <circle cx="90" cy="200" r="9" fill="#cfe8f2" stroke="#7fb6cc" stroke-width="1.5"/>
+        </g>
+        <!-- mitochondria -->
+        <g class="organelle" data-o="mito">
+          <ellipse cx="230" cy="150" rx="18" ry="10" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(25 230 150)"/>
+          <ellipse cx="100" cy="120" rx="17" ry="9" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(-20 100 120)"/>
+          <ellipse cx="200" cy="215" rx="16" ry="9" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(10 200 215)"/>
+          <ellipse cx="70" cy="170" rx="15" ry="8" fill="#e07a5f" stroke="#b8543a" stroke-width="1.5" transform="rotate(40 70 170)"/>
+        </g>
+        <!-- golgi -->
+        <g class="organelle" data-o="golgi">
+          <path d="M 195 60 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+          <path d="M 195 68 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+          <path d="M 195 76 q 22 -6 22 0 q 0 6 -22 0" fill="none" stroke="#c17f3a" stroke-width="2.5"/>
+        </g>
+        <!-- ER -->
+        <g class="organelle" data-o="er">
+          <path d="M 110 60 q 15 15 0 30 q -15 15 0 30 q 15 15 0 30" fill="none" stroke="#8858c9" stroke-width="2.2"/>
+        </g>
+        <!-- ribosomes -->
+        <g class="organelle" data-o="ribosome">
+          <circle cx="150" cy="50" r="2.6" fill="#333"/><circle cx="255" cy="130" r="2.6" fill="#333"/>
+          <circle cx="60" cy="140" r="2.6" fill="#333"/><circle cx="140" cy="225" r="2.6" fill="#333"/>
+          <circle cx="270" cy="180" r="2.6" fill="#333"/><circle cx="45" cy="95" r="2.6" fill="#333"/>
+        </g>
+        <!-- nucleus -->
+        <g class="organelle" data-o="nucleus">
+          <circle cx="160" cy="140" r="38" fill="#a78bcf" stroke="#6f4fa3" stroke-width="2.5"/>
+          <circle cx="170" cy="132" r="9" fill="#6f4fa3"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <table class="compare">
+    <thead><tr><th>Feature</th><th>Plant cell</th><th>Animal cell</th></tr></thead>
+    <tbody>
+      <tr><td>Cell wall</td><td class="yes">✓ Present (cellulose)</td><td class="no">✗ Absent</td></tr>
+      <tr><td>Chloroplasts</td><td class="yes">✓ Present</td><td class="no">✗ Absent</td></tr>
+      <tr><td>Vacuole</td><td>One large, permanent, central</td><td>Several small, temporary</td></tr>
+      <tr><td>Shape</td><td>Fixed &amp; rectangular (due to wall)</td><td>Irregular &amp; flexible</td></tr>
+      <tr><td>Nucleus, mitochondria, ER, Golgi body, ribosomes, cytoplasm, membrane</td><td class="yes">✓ Present</td><td class="yes">✓ Present</td></tr>
+    </tbody>
+  </table>
+
+  <div class="mitosis-card">
+    <h2>🧬 Cell Division — Mitosis</h2>
+    <div class="stage-btns">
+      <div class="stage-btn active" data-s="0">1. Prophase</div>
+      <div class="stage-btn" data-s="1">2. Metaphase</div>
+      <div class="stage-btn" data-s="2">3. Anaphase</div>
+      <div class="stage-btn" data-s="3">4. Telophase</div>
+    </div>
+    <canvas id="mitosisCanvas" width="560" height="200"></canvas>
+    <div class="stage-desc" id="stageDesc"></div>
+  </div>
+</div>
+
+<script>
+const ORGANELLE_INFO = {
+  membrane: {name:"Plasma Membrane", found:"Both cells", fn:"A thin, flexible barrier that controls which substances enter and leave the cell."},
+  wall: {name:"Cell Wall", found:"Plant cells only", fn:"A rigid outer layer made of cellulose. It supports the cell and gives it a fixed, rectangular shape."},
+  nucleus: {name:"Nucleus", found:"Both cells", fn:"Contains the cell's DNA and controls all of its activities, including growth and cell division."},
+  mito: {name:"Mitochondria", found:"Both cells", fn:"The site of aerobic respiration — this is where energy is released from food for the cell to use."},
+  cytoplasm: {name:"Cytoplasm", found:"Both cells", fn:"The jelly-like fluid filling the cell, where many chemical reactions take place and organelles are suspended."},
+  vacuole: {name:"Vacuole", found:"Both — very different", fn:"Plant cells have one large, permanent central vacuole that stores cell sap and keeps the cell firm (turgid). Animal cells only have small, temporary vacuoles."},
+  golgi: {name:"Golgi Body", found:"Both cells", fn:"Packages and processes proteins made by the cell, preparing them to be transported or released."},
+  er: {name:"Endoplasmic Reticulum", found:"Both cells", fn:"A network of membranes that transports proteins and other materials around inside the cell."},
+  ribosome: {name:"Ribosome", found:"Both cells", fn:"The site of protein synthesis — where the cell builds proteins from amino acids."},
+  chloroplast: {name:"Chloroplast", found:"Plant cells only", fn:"Contains chlorophyll and is the site of photosynthesis, converting light energy into chemical energy (food)."}
+};
+
+document.querySelectorAll('.organelle').forEach(g=>{
+  g.addEventListener('click', ()=>{
+    document.querySelectorAll('.organelle').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll(`.organelle[data-o="${g.dataset.o}"]`).forEach(x=>x.classList.add('active'));
+    const info = ORGANELLE_INFO[g.dataset.o];
+    document.getElementById('infoPanel').innerHTML = `
+      <div class="name">${info.name}</div>
+      <div class="found">${info.found}</div>
+      <div class="fn">${info.fn}</div>`;
+  });
+});
+
+// ============================================================
+// MITOSIS STAGE VIEWER
+// ============================================================
+const stages = [
+  {desc:"The chromosomes condense from loose chromatin into visible, tightly-coiled structures inside the nucleus. The nuclear membrane begins to break down."},
+  {desc:"The chromosomes line up along the middle (equator) of the cell, attached to spindle fibres from opposite poles."},
+  {desc:"The spindle fibres pull the sister chromatids apart, dragging one full set of chromosomes to each end (pole) of the cell."},
+  {desc:"Two new nuclear membranes form around each set of chromosomes, and the cell begins to pinch inward to form two separate daughter cells."}
+];
+let stage = 0;
+const mCanvas = document.getElementById('mitosisCanvas');
+const mctx = mCanvas.getContext('2d');
+
+function drawChromosome(ctx,x,y,rot,color){
+  ctx.save();
+  ctx.translate(x,y); ctx.rotate(rot);
+  ctx.strokeStyle=color; ctx.lineWidth=4; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(-8,-10); ctx.lineTo(8,10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(8,-10); ctx.lineTo(-8,10); ctx.stroke();
+  ctx.restore();
+}
+
+function drawMitosis(){
+  const w=mCanvas.width, h=mCanvas.height;
+  mctx.clearRect(0,0,w,h);
+  mctx.strokeStyle="#c9c3b2"; mctx.lineWidth=2;
+
+  if(stage===0){
+    mctx.strokeStyle="#9db98a"; mctx.beginPath(); mctx.ellipse(w/2,h/2,150,80,0,0,Math.PI*2); mctx.stroke();
+    mctx.strokeStyle="#a78bcf"; mctx.beginPath(); mctx.ellipse(w/2,h/2,60,45,0,0,Math.PI*2); mctx.stroke();
+    const positions = [[-20,-15],[15,-20],[-10,15],[20,10]];
+    positions.forEach((p,i)=>drawChromosome(mctx, w/2+p[0], h/2+p[1], i*0.7, "#c14e3a"));
+  } else if(stage===1){
+    mctx.strokeStyle="#9db98a"; mctx.beginPath(); mctx.ellipse(w/2,h/2,150,80,0,0,Math.PI*2); mctx.stroke();
+    mctx.strokeStyle="#d8d4c8"; mctx.setLineDash([4,4]);
+    mctx.beginPath(); mctx.moveTo(w/2,h/2-70); mctx.lineTo(w/2,h/2+70); mctx.stroke(); mctx.setLineDash([]);
+    for(let i=0;i<4;i++) drawChromosome(mctx, w/2, h/2-45+i*30, Math.PI/2, "#c14e3a");
+  } else if(stage===2){
+    mctx.strokeStyle="#9db98a"; mctx.beginPath(); mctx.ellipse(w/2,h/2,150,80,0,0,Math.PI*2); mctx.stroke();
+    for(let i=0;i<4;i++){
+      drawChromosome(mctx, w/2-70, h/2-45+i*30, Math.PI/2, "#c14e3a");
+      drawChromosome(mctx, w/2+70, h/2-45+i*30, Math.PI/2, "#3457d5");
+    }
+    mctx.strokeStyle="#8a8470"; mctx.beginPath(); mctx.moveTo(w/2-70,h/2); mctx.lineTo(w/2-140,h/2); mctx.stroke();
+    mctx.beginPath(); mctx.moveTo(w/2+70,h/2); mctx.lineTo(w/2+140,h/2); mctx.stroke();
+  } else if(stage===3){
+    mctx.strokeStyle="#9db98a";
+    mctx.beginPath(); mctx.ellipse(w/2-75,h/2,75,75,0,0,Math.PI*2); mctx.stroke();
+    mctx.beginPath(); mctx.ellipse(w/2+75,h/2,75,75,0,0,Math.PI*2); mctx.stroke();
+    mctx.strokeStyle="#a78bcf";
+    mctx.beginPath(); mctx.ellipse(w/2-75,h/2,32,26,0,0,Math.PI*2); mctx.stroke();
+    mctx.beginPath(); mctx.ellipse(w/2+75,h/2,32,26,0,0,Math.PI*2); mctx.stroke();
+    for(let i=0;i<4;i++){
+      drawChromosome(mctx, w/2-75+((i%2)*14-7), h/2-15+i*10, i*0.5, "#c14e3a");
+      drawChromosome(mctx, w/2+75+((i%2)*14-7), h/2-15+i*10, i*0.5, "#3457d5");
+    }
+  }
+  document.getElementById('stageDesc').textContent = stages[stage].desc;
+}
+
+document.querySelectorAll('.stage-btn').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.stage-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    stage = +b.dataset.s;
+    drawMitosis();
+  };
+});
+
+drawMitosis();
+</script>
+</body>
+</html>
